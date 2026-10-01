@@ -19,7 +19,7 @@ const subscriptionRoutes = require('./routes/subscriptionRoutes')
 const paymentRoutes = require("./routes/paymentRoutes")
 
 // Setting up port
-const PORT = process.env.PORT
+const PORT = process.env.PORT || 3000
 const app = express()
 
 // So your server will capture both: req.body and req.rawBody
