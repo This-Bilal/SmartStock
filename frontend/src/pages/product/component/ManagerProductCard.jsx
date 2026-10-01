@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import StockActionModal from "../../manager/component/stockActionModal";
+import StockActionModal from "../../manager/component/StockActionModal";
 import { changeProductStatus } from "../../../services/productService";
 
 const ManagerProductCard = ({ product, onStatusChange, onStatusError }) => {
