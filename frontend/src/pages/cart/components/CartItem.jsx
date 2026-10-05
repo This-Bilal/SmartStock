@@ -1,6 +1,9 @@
 import React from "react";
 
 const CartItem = ({ item, onQuantityChange, onRemove, loading }) => {
+
+  console.log("Cart item:", item);
+console.log("Cart image:", item.image);
   return (
     <div className="p-4 sm:p-5">
       <div className="flex gap-3 sm:gap-4">
