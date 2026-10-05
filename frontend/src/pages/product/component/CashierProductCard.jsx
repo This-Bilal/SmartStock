@@ -19,7 +19,7 @@ const CashierProductCard = ({ product, onAddToCart, loading }) => {
         <div className="flex h-40 items-center justify-center bg-gray-50 p-2">
           {product.image ? (
             <img
-              src={`http://localhost:3000${product.image}`}
+              src={`https://smartstock-api-i50s.onrender.com${product.image}`}
               alt={product.name}
               className="h-full w-full object-contain transition-transform duration-200 group-hover:scale-105"
             />
