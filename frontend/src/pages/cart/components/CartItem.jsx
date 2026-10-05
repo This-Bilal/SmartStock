@@ -8,7 +8,7 @@ const CartItem = ({ item, onQuantityChange, onRemove, loading }) => {
         <div className="flex h-16 w-16 shrink-0 items-center justify-center overflow-hidden rounded-lg bg-gray-50 sm:h-20 sm:w-20">
           {item.image ? (
             <img
-              src={`http://localhost:3000${item.image}`}
+              src={`https://smartstock-api-i50s.onrender.com${item.image}`}
               alt={item.productName}
               className="h-full w-full object-contain"
             />
