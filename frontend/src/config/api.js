@@ -2,6 +2,12 @@ import axios from "axios";
 
 // Getting the base URL
 const getBaseUrl = () => {
+  // Use Vercel's same-origin proxy in production so Safari treats auth cookies
+  // as first-party instead of blocking cookies sent to the cross-site API host.
+  if (!import.meta.env.DEV) {
+    return "/api";
+  }
+
   return import.meta.env.VITE_API_BASE_URL || "http://localhost:3000/api";
 };
 

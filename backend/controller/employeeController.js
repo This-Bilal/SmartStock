@@ -122,7 +122,7 @@ const loginEmployee = asyncHandler(async (req, res) => {
   res.cookie("token", token, {
     path: "/",
     httpOnly: true,
-    expires: new Date(Date.now() + 1000 * 84600), //24hrs
+    expires: new Date(Date.now() + 1000 * 86400), //24hrs
     sameSite: "none",
     secure: true,
   });
@@ -140,8 +140,11 @@ const loginEmployee = asyncHandler(async (req, res) => {
 
 const logoutEmployee = asyncHandler(async (req, res) => {
   res.cookie("token", "", {
+    path: "/",
     httpOnly: true,
     expires: new Date(0),
+    sameSite: "none",
+    secure: true,
   });
 
   res.status(200).json({

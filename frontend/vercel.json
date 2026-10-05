@@ -2,6 +2,10 @@
 {
   "rewrites": [
     {
+      "source": "/api/:path*",
+      "destination": "https://smartstock-api-i50s.onrender.com/api/:path*"
+    },
+    {
       "source": "/(.*)",
       "destination": "/"
     }

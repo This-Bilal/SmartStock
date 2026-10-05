@@ -109,7 +109,7 @@ const loginOwner = asyncHandler(async (req, res) => {
   res.cookie("token", token, {
     path: "/",
     httpOnly: true,
-    expires: new Date(Date.now() + 1000 * 84600), //24hrs
+    expires: new Date(Date.now() + 1000 * 86400), //24hrs
     sameSite: "none",
     secure: true,
   });
