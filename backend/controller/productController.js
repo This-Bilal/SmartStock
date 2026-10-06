@@ -3,6 +3,27 @@ const Product = require("../models/productModel");
 const Category = require("../models/categoryModel");
 const categoryModel = require("../models/categoryModel");
 const { checkPlanLimit } = require("../services/subscriptionService");
+const cloudinary = require("../config/cloudinary");
+
+const uploadImageToCloudinary = (fileBuffer) => {
+  return new Promise((resolve, reject) => {
+    const uploadStream = cloudinary.uploader.upload_stream(
+      {
+        folder: "smartstock/product",
+        resource_type: "image",
+      },
+      (error, result) => {
+        if (error) {
+          reject(error);
+        } else {
+          resolve(result);
+        }
+      },
+    );
+
+    uploadStream.end(fileBuffer);
+  });
+};
 
 const createProduct = asyncHandler(async (req, res) => {
   const { name, category, price, costPrice, lowStockLimit } = req.body;
@@ -77,7 +98,12 @@ const createProduct = asyncHandler(async (req, res) => {
     });
   }
 
-  const image = req.file ? `/uploads/${req.file.filename}` : "";
+  let image = "";
+
+  if (req.file) {
+    const uploadedImage = await uploadImageToCloudinary(req.file.buffer);
+    image = uploadedImage.secure_url;
+  }
 
   const product = await Product.create({
     owner: ownerId,
@@ -366,8 +392,11 @@ const updateProduct = asyncHandler(async (req, res) => {
   }
 
   // Update image
+  // Update image
   if (req.file) {
-    product.image = `/uploads/${req.file.filename}`;
+    const uploadedImage = await uploadImageToCloudinary(req.file.buffer);
+
+    product.image = uploadedImage.secure_url;
     hasChanges = true;
   }
 
