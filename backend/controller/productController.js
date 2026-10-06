@@ -14,14 +14,21 @@ const uploadImageToCloudinary = (fileBuffer) => {
       },
       (error, result) => {
         if (error) {
-          console.error("Cloudinary product image upload failed", {
+          const providerError = error.error || error;
+          const errorDetails = {
             name: error.name,
-            message: error.message,
-            httpCode: error.http_code,
-            code: error.code,
-          });
+            message: providerError.message || error.message,
+            httpCode: error.http_code || error.statusCode || providerError.http_code,
+            code: error.code || providerError.code,
+          };
 
-          const uploadError = new Error("Cloudinary image upload failed.");
+          console.error(
+            `Cloudinary product image upload failed: ${JSON.stringify(errorDetails)}`,
+          );
+
+          const uploadError = new Error("Cloudinary image upload failed.", {
+            cause: error,
+          });
           uploadError.status = 502;
           reject(uploadError);
         } else {
