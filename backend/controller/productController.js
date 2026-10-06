@@ -14,7 +14,16 @@ const uploadImageToCloudinary = (fileBuffer) => {
       },
       (error, result) => {
         if (error) {
-          reject(error);
+          console.error("Cloudinary product image upload failed", {
+            name: error.name,
+            message: error.message,
+            httpCode: error.http_code,
+            code: error.code,
+          });
+
+          const uploadError = new Error("Cloudinary image upload failed.");
+          uploadError.status = 502;
+          reject(uploadError);
         } else {
           resolve(result);
         }
