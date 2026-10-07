@@ -5,70 +5,35 @@ const categoryModel = require("../models/categoryModel");
 const { checkPlanLimit } = require("../services/subscriptionService");
 const cloudinary = require("../config/cloudinary");
 
-// const uploadImageToCloudinary = (fileBuffer) => {
-//   return new Promise((resolve, reject) => {
-//     const uploadStream = cloudinary.uploader.upload_stream(
-//       {
-//         folder: "smartstock/product",
-//         resource_type: "image",
-//       },
-//       (error, result) => {
-//         if (error) {
-//           const providerError = error.error || error;
-//           const errorDetails = {
-//             name: error.name,
-//             message: providerError.message || error.message,
-//             httpCode: error.http_code || error.statusCode || providerError.http_code,
-//             code: error.code || providerError.code,
-//           };
-
-//           console.error(
-//             `Cloudinary product image upload failed: ${JSON.stringify(errorDetails)}`,
-//           );
-
-//           const uploadError = new Error("Cloudinary image upload failed.", {
-//             cause: error,
-//           });
-//           uploadError.status = 502;
-//           reject(uploadError);
-//         } else {
-//           resolve(result);
-//         }
-//       },
-//     );
-
-//     uploadStream.end(fileBuffer);
-//   });
-// };
-
-const cloudinary = require("../config/cloudinary");
-
 const uploadImageToCloudinary = (fileBuffer) => {
   return new Promise((resolve, reject) => {
     const uploadStream = cloudinary.uploader.upload_stream(
       {
-        folder: "smartstock/products",
+        folder: "smartstock/product",
         resource_type: "image",
       },
       (error, result) => {
         if (error) {
-          console.error("========== CLOUDINARY ERROR ==========");
-          console.error("Name:", error.name);
-          console.error("Message:", error.message);
-          console.error("HTTP Code:", error.http_code);
-          console.error("Full Error:", error);
-          console.error("======================================");
+          const providerError = error.error || error;
+          const errorDetails = {
+            name: error.name,
+            message: providerError.message || error.message,
+            httpCode: error.http_code || error.statusCode || providerError.http_code,
+            code: error.code || providerError.code,
+          };
 
-          reject(error);
-          return;
+          console.error(
+            `Cloudinary product image upload failed: ${JSON.stringify(errorDetails)}`,
+          );
+
+          const uploadError = new Error("Cloudinary image upload failed.", {
+            cause: error,
+          });
+          uploadError.status = 502;
+          reject(uploadError);
+        } else {
+          resolve(result);
         }
-
-        console.log("========== CLOUDINARY SUCCESS ==========");
-        console.log("URL:", result.secure_url);
-        console.log("Public ID:", result.public_id);
-        console.log("========================================");
-
-        resolve(result);
       },
     );
 
