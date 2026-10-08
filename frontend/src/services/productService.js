@@ -1,4 +1,5 @@
 import { apiRequest, PRODUCTS_ENDPOINTS } from "../config/api";
+import { uploadProductImage } from "./cloudinaryService";
 
 const transformData = (data) => ({
   id: data?._id,
@@ -33,21 +34,18 @@ export const createProduct = async (details) => {
   }
 
   try {
-    const formData = new FormData();
-
-    formData.append("name", name.trim());
-    formData.append("category", category);
-    formData.append("price", price);
-    formData.append("costPrice", costPrice);
-    formData.append("lowStockLimit", lowStockLimit);
-
-    if (image) {
-      formData.append("image", image);
-    }
+    const imageUrl = await uploadProductImage(image);
 
     const response = await apiRequest(PRODUCTS_ENDPOINTS.CREATE_PRODUCTS, {
       method: "POST",
-      body: formData,
+      body: {
+        name: name.trim(),
+        category,
+        price,
+        costPrice,
+        lowStockLimit,
+        image: imageUrl,
+      },
     });
 
     const transformedData = transformData(response);
@@ -111,14 +109,14 @@ export const updateProduct = async (productId, details) => {
     throw new Error("Invalid product ID");
   }
 
-  const formData = new FormData();
+  const updateData = {};
 
   if (name !== undefined) {
     if (!name?.trim()) {
       throw new Error("Name cannot be left blank");
     }
 
-    formData.append("name", name.trim());
+    updateData.name = name.trim();
   }
 
   if (category !== undefined) {
@@ -126,7 +124,7 @@ export const updateProduct = async (productId, details) => {
       throw new Error("Category cannot be left blank");
     }
 
-    formData.append("category", category);
+    updateData.category = category;
   }
 
   if (price !== undefined) {
@@ -134,7 +132,7 @@ export const updateProduct = async (productId, details) => {
       throw new Error("Price cannot be left blank");
     }
 
-    formData.append("price", price);
+    updateData.price = price;
   }
 
   if (costPrice !== undefined) {
@@ -142,7 +140,7 @@ export const updateProduct = async (productId, details) => {
       throw new Error("Cost price cannot be left blank");
     }
 
-    formData.append("costPrice", costPrice);
+    updateData.costPrice = costPrice;
   }
 
   if (lowStockLimit !== undefined) {
@@ -154,14 +152,14 @@ export const updateProduct = async (productId, details) => {
       throw new Error("Invalid parameter for low stock limit");
     }
 
-    formData.append("lowStockLimit", lowStockLimit);
+    updateData.lowStockLimit = lowStockLimit;
   }
 
   if (image) {
-    formData.append("image", image);
+    updateData.image = await uploadProductImage(image);
   }
 
-  if ([...formData.entries()].length === 0) {
+  if (Object.keys(updateData).length === 0) {
     throw new Error("No changes made.");
   }
 
@@ -170,7 +168,7 @@ export const updateProduct = async (productId, details) => {
       PRODUCTS_ENDPOINTS.UPDATE_PRODUCT(productId),
       {
         method: "PATCH",
-        body: formData,
+        body: updateData,
       },
     );
 

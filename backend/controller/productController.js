@@ -3,54 +3,36 @@ const Product = require("../models/productModel");
 const Category = require("../models/categoryModel");
 const categoryModel = require("../models/categoryModel");
 const { checkPlanLimit } = require("../services/subscriptionService");
-const cloudinary = require("../config/cloudinary");
 
-const uploadImageToCloudinary = (fileBuffer) => {
-  return new Promise((resolve, reject) => {
-    const uploadStream = cloudinary.uploader.upload_stream(
-      {
-        folder: "smartstock/product",
-        resource_type: "image",
-      },
-      (error, result) => {
-        if (error) {
-          const providerError = error.error || error;
-          const errorDetails = {
-            name: error.name,
-            message: providerError.message || error.message,
-            httpCode: error.http_code || error.statusCode || providerError.http_code,
-            code: error.code || providerError.code,
-          };
+const isCloudinaryImageUrl = (value) => {
+  if (typeof value !== "string") {
+    return false;
+  }
 
-          console.error(
-            `Cloudinary product image upload failed: ${JSON.stringify(errorDetails)}`,
-          );
-
-          const uploadError = new Error("Cloudinary image upload failed.", {
-            cause: error,
-          });
-          uploadError.status = 502;
-          reject(uploadError);
-        } else {
-          resolve(result);
-        }
-      },
+  try {
+    const imageUrl = new URL(value);
+    return (
+      imageUrl.protocol === "https:" &&
+      imageUrl.hostname === "res.cloudinary.com" &&
+      imageUrl.pathname.includes("/image/upload/")
     );
-
-    uploadStream.end(fileBuffer);
-  });
-};
-
-module.exports = {
-  uploadImageToCloudinary,
+  } catch {
+    return false;
+  }
 };
 
 const createProduct = asyncHandler(async (req, res) => {
-  const { name, category, price, costPrice, lowStockLimit } = req.body;
+  const { name, category, price, costPrice, lowStockLimit, image = "" } = req.body;
 
   if (!name || !category || price === undefined || costPrice === undefined) {
     return res.status(400).json({
       message: "Name, category, price and cost price are required.",
+    });
+  }
+
+  if (image && !isCloudinaryImageUrl(image)) {
+    return res.status(400).json({
+      message: "Image must be a valid secure Cloudinary image URL.",
     });
   }
 
@@ -116,13 +98,6 @@ const createProduct = asyncHandler(async (req, res) => {
       owner: ownerId,
       sku: generatedSku,
     });
-  }
-
-  let image = "";
-
-  if (req.file) {
-    const uploadedImage = await uploadImageToCloudinary(req.file.buffer);
-    image = uploadedImage.secure_url;
   }
 
   const product = await Product.create({
@@ -284,7 +259,7 @@ const getProduct = asyncHandler(async (req, res) => {
 const updateProduct = asyncHandler(async (req, res) => {
   const { id } = req.params;
 
-  const { name, sku, category, price, costPrice, lowStockLimit } = req.body;
+  const { name, sku, category, price, costPrice, lowStockLimit, image } = req.body;
 
   const ownerId = req.user.role === "owner" ? req.user._id : req.user.owner;
 
@@ -411,13 +386,18 @@ const updateProduct = asyncHandler(async (req, res) => {
     }
   }
 
-  // Update image
-  // Update image
-  if (req.file) {
-    const uploadedImage = await uploadImageToCloudinary(req.file.buffer);
+  // Save the secure URL returned by the frontend's Cloudinary upload.
+  if (image !== undefined) {
+    if (!isCloudinaryImageUrl(image)) {
+      return res.status(400).json({
+        message: "Image must be a valid secure Cloudinary image URL.",
+      });
+    }
 
-    product.image = uploadedImage.secure_url;
-    hasChanges = true;
+    if (image !== product.image) {
+      product.image = image;
+      hasChanges = true;
+    }
   }
 
   // No actual changes were made
