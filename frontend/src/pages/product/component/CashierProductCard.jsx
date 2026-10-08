@@ -1,5 +1,6 @@
 import { useState } from "react";
 import AddToCartModal from "../../cahier/component/AddToCartModal";
+import { getProductImageUrl } from "../../../config/productImage";
 
 const CashierProductCard = ({ product, onAddToCart, loading }) => {
   const [showModal, setShowModal] = useState(false);
@@ -19,7 +20,7 @@ const CashierProductCard = ({ product, onAddToCart, loading }) => {
         <div className="flex h-40 items-center justify-center bg-gray-50 p-2">
           {product.image ? (
             <img
-              src={`https://smartstock-api-i50s.onrender.com${product.image}`}
+              src={getProductImageUrl(product.image)}
               alt={product.name}
               className="h-full w-full object-contain transition-transform duration-200 group-hover:scale-105"
             />

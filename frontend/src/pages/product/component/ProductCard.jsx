@@ -1,4 +1,5 @@
 import React from "react";
+import { getProductImageUrl } from "../../../config/productImage";
 
 const ProductCard = ({ product }) => {
   const isOutOfStock = product.quantity === 0;
@@ -17,7 +18,7 @@ const ProductCard = ({ product }) => {
       <div className="flex h-40 items-center justify-center bg-gray-50 p-2">
         {product.image ? (
           <img
-            src={`https://smartstock-api-i50s.onrender.com${product.image}`}
+            src={getProductImageUrl(product.image)}
             alt={product.name}
             className="h-full w-full object-contain transition-transform duration-200 group-hover:scale-105"
           />

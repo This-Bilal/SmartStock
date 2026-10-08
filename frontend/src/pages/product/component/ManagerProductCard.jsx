@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import StockActionModal from "../../manager/component/StockActionModal";
 import { changeProductStatus } from "../../../services/productService";
+import { getProductImageUrl } from "../../../config/productImage";
 
 const ManagerProductCard = ({ product, onStatusChange, onStatusError }) => {
   const navigate = useNavigate();
@@ -50,7 +51,7 @@ const ManagerProductCard = ({ product, onStatusChange, onStatusError }) => {
       <div className="flex h-40 items-center justify-center bg-gray-50 p-2">
         {product.image ? (
           <img
-            src={`https://smartstock-api-i50s.onrender.com${product.image}`}
+            src={getProductImageUrl(product.image)}
             alt={product.name}
             className="h-full w-full object-contain transition-transform duration-200 group-hover:scale-105"
           />

@@ -5,6 +5,7 @@ import BackButton from "../../components/other/BackButton";
 import { useTitle } from "../../hooks/useTitile";
 import { getAllCategories } from "../../services/categoryService";
 import { toast, Toaster } from "sonner";
+import { getProductImageUrl } from "../../config/productImage";
 
 const UpdateProduct = () => {
   useTitle("SmartStock: update stock");
@@ -247,7 +248,7 @@ const UpdateProduct = () => {
                   <p className="mb-2 text-xs text-gray-400">Current image</p>
 
                   <img
-                    src={`http://localhost:3000${product.image}`}
+                    src={getProductImageUrl(product.image)}
                     alt={product.name}
                     className="h-32 w-32 rounded-lg bg-gray-50 object-contain"
                   />
