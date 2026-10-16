@@ -40,7 +40,9 @@ const CreateEmployee = () => {
     try {
       await createEmployee(formData);
 
-      toast.success("Employee created successfully.")
+      toast.success(
+        "Employee created. A verification link has been sent to their email.",
+      );
 
       setTimeout(() => {
         navigate("/employeeList");

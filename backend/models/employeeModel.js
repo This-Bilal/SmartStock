@@ -19,11 +19,30 @@ const employeeSchema = new mongoose.Schema(
       required: true,
       trim: true,
       lowercase: true,
+      match: [
+        /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
+        "Please provide a valid email address.",
+      ],
     },
 
     password: {
       type: String,
       required: true,
+    },
+
+    isEmailVerified: {
+      type: Boolean,
+      default: true,
+    },
+
+    emailVerificationTokenHash: {
+      type: String,
+      select: false,
+    },
+
+    emailVerificationExpires: {
+      type: Date,
+      select: false,
     },
 
     role: {

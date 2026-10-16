@@ -9,6 +9,7 @@ SmartStock is a full-stack inventory and sales management platform designed for 
 ## Features
 
 * Secure authentication with JWT and HTTP-only cookies
+* Email verification for owner and employee registrations
 * Owner and employee management
 * Role-based access for Owners, Managers, and Cashiers
 * Product and inventory management
@@ -77,6 +78,7 @@ Primarily responsible for recording and managing sales.
 * Mongoose
 * JWT
 * bcrypt
+* Nodemailer
 
 ### Payments
 
@@ -213,6 +215,26 @@ npm install
 ### 3. Configure environment variables
 
 Create a `.env` file containing your database, JWT, Paystack, and application configuration.
+
+Email verification uses Nodemailer with an SMTP provider. Configure the following
+in the backend `.env` file using the SMTP settings provided by your email provider:
+
+```env
+SMTP_HOST=smtp.your-email-provider.com
+SMTP_PORT=587
+SMTP_SECURE=false
+SMTP_USER=your-smtp-username
+SMTP_PASS=your-smtp-password
+SMTP_FROM=SmartStock <no-reply@your-verified-domain.com>
+FRONTEND_URL=https://your-frontend-domain.com
+```
+
+Use port `587` with `SMTP_SECURE=false` for STARTTLS or port `465` with
+`SMTP_SECURE=true` for implicit TLS, according to your provider's instructions.
+For local development, `FRONTEND_URL` can be `http://localhost:5173`. New owner
+accounts and owner-created employee accounts must verify their email before
+logging in. Verification links expire after 24 hours; users can request a
+replacement from the verification page.
 
 ### 4. Start the backend
 

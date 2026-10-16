@@ -1,3 +1,4 @@
+
 const mongoose = require ('mongoose')
 
 const ownerSchema = new mongoose.Schema (
@@ -13,7 +14,11 @@ const ownerSchema = new mongoose.Schema (
             required: true,
             trim: true,
             unique: true,
-            lowercase: true
+            lowercase: true,
+            match: [
+                /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
+                "Please provide a valid email address"
+            ]
         },
 
         businessName: {
@@ -31,6 +36,21 @@ const ownerSchema = new mongoose.Schema (
         password: {
             type: String,
             required: true
+        },
+
+        isEmailVerified: {
+            type: Boolean,
+            default: true
+        },
+
+        emailVerificationTokenHash: {
+            type: String,
+            select: false
+        },
+
+        emailVerificationExpires: {
+            type: Date,
+            select: false
         },
 
         role: {

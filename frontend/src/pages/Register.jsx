@@ -46,7 +46,7 @@ const Register = () => {
     setLoading(true);
 
     try {
-      const response = await registerOwner({
+      await registerOwner({
         name: formData.name,
         email: formData.email,
         businessName: formData.businessName,
@@ -54,9 +54,10 @@ const Register = () => {
         password: formData.password,
       });
 
-      toast.success("Registration successful");
-
-      navigate("/login");
+      toast.success("Check your email to verify your account.");
+      navigate(
+        `/verify-email?email=${encodeURIComponent(formData.email.trim())}`,
+      );
     } catch (error) {
       toast.error(error.message || "Registration failed.");
     } finally {
