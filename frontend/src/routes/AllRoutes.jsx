@@ -37,7 +37,6 @@ import CashierSalesPage from "../pages/cahier/component/CashierSalesPage";
 import CashierProductList from "../pages/product/CashierProductList";
 import SubscriptionPage from "../pages/subscription/SubscriptionPage";
 import PaymentCallback from "../pages/PaymentCallback";
-import VerifyEmail from "../pages/VerifyEmail";
 
 const AllRoutes = () => {
   return (
@@ -57,7 +56,6 @@ const AllRoutes = () => {
       <Route path="/salespage" element={<SalesPage />} />
       <Route path="/sales/:saleNumber" element={<SaleDetails />} />
       <Route path="/register" element={<Register />} />
-      <Route path="/verify-email" element={<VerifyEmail />} />
       <Route path="/login" element={<Login />} />
       <Route path="/ownerprofile" element={<OwnerProfile />} />
       <Route path="/reports" element={<ReportsPage />} />

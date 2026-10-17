@@ -5,7 +5,6 @@ const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const JWT_TOKEN = process.env.JWT_TOKEN;
 const { checkPlanLimit } = require("../services/subscriptionService");
-const { issueEmailVerification } = require("../services/emailVerificationService");
 
 const createEmployee = asyncHandler(async (req, res) => {
   const { name, email, password, role } = req.body;
@@ -69,10 +68,7 @@ const createEmployee = asyncHandler(async (req, res) => {
     email: employeeEmail,
     password: hashedPassword,
     role,
-    isEmailVerified: false,
   });
-
-  await issueEmailVerification(employee);
 
   return res.status(201).json({
     _id: employee._id,
@@ -81,7 +77,6 @@ const createEmployee = asyncHandler(async (req, res) => {
     role: employee.role,
     isActive: employee.isActive,
     owner: employee.owner,
-    emailVerificationRequired: true,
   });
 });
 
@@ -111,13 +106,6 @@ const loginEmployee = asyncHandler(async (req, res) => {
   if (!isMatch) {
     return res.status(401).json({
       message: "Invalid email or password.",
-    });
-  }
-
-  if (!employee.isEmailVerified) {
-    return res.status(403).json({
-      code: "EMAIL_NOT_VERIFIED",
-      message: "Please verify your email address before logging in.",
     });
   }
 

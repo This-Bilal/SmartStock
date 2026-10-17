@@ -161,15 +161,6 @@ const Login = () => {
             Register
           </Link>
         </p>
-        <p className="mt-2 text-center text-xs sm:text-sm">
-          Need to verify your email?{" "}
-          <Link
-            to={`/verify-email${email ? `?email=${encodeURIComponent(email)}` : ""}`}
-            className="text-red-600 hover:underline"
-          >
-            Resend verification link
-          </Link>
-        </p>
       </div>
     </div>
   );

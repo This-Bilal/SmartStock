@@ -63,28 +63,6 @@ export const registerOwner = async (ownerDetails) => {
   }
 };
 
-export const verifyEmail = async (token) => {
-  if (!token) {
-    throw new Error("A verification token is required.");
-  }
-
-  return apiRequest(AUTH_ENDPOINT.VERIFY_EMAIL, {
-    method: "POST",
-    body: { token },
-  });
-};
-
-export const resendVerificationEmail = async (email) => {
-  if (!email?.trim()) {
-    throw new Error("An email address is required.");
-  }
-
-  return apiRequest(AUTH_ENDPOINT.RESEND_VERIFICATION_EMAIL, {
-    method: "POST",
-    body: { email: normaliseEmail(email) },
-  });
-};
-
 /**
  * Login Owner
  */
@@ -209,8 +187,6 @@ export const checkLoginStatus = async () => {
 
 const authService = {
   registerOwner,
-  verifyEmail,
-  resendVerificationEmail,
   loginOwner,
   logoutOwner,
   loginEmployee,

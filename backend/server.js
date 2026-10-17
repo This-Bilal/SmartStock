@@ -15,7 +15,6 @@ const productRoutes = require('./routes/productRoutes')
 const reportRoutes = require('./routes/reportRoutes')
 const salesRoutes = require('./routes/salesRoutes')
 const authRoute = require('./routes/authRoute')
-const emailVerificationRoutes = require('./routes/emailVerificationRoutes')
 const subscriptionRoutes = require('./routes/subscriptionRoutes')
 const paymentRoutes = require("./routes/paymentRoutes")
 
@@ -64,7 +63,6 @@ app.use('/api/products', productRoutes)
 app.use('/api/reports', reportRoutes)
 app.use('/api/sales', salesRoutes)
 app.use('/api/loginStatus', authRoute)
-app.use('/api/auth/email', emailVerificationRoutes)
 app.use('/api/subscription', subscriptionRoutes);
 app.use("/api/payments", paymentRoutes);
 

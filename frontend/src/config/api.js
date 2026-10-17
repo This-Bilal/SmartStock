@@ -20,8 +20,6 @@ const api = (path) => {
 // Auth endpoint
 export const AUTH_ENDPOINT = {
   LOGIN_STATUS: api("loginStatus/status"),
-  VERIFY_EMAIL: api("auth/email/verify"),
-  RESEND_VERIFICATION_EMAIL: api("auth/email/resend"),
 };
 
 // Cart endpoints

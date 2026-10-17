@@ -4,7 +4,6 @@ const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const JWT_TOKEN = process.env.JWT_TOKEN;
 const Subscription = require("../models/subscriptionModel");
-const { issueEmailVerification } = require("../services/emailVerificationService");
 
 const registerOwner = asyncHandler(async (req, res) => {
   const { name, email, businessName, phone, password } = req.body;
@@ -43,7 +42,6 @@ const registerOwner = asyncHandler(async (req, res) => {
     businessName,
     phone,
     password: hashPassword,
-    isEmailVerified: false,
   });
 
   // Give the new business a Free subscription
@@ -52,8 +50,6 @@ const registerOwner = asyncHandler(async (req, res) => {
     plan: "free",
     status: "active",
   });
-
-  await issueEmailVerification(owner);
 
   if (owner) {
     const { _id, name, email, businessName, phone, role } = owner;
@@ -65,7 +61,6 @@ const registerOwner = asyncHandler(async (req, res) => {
       businessName,
       phone,
       role,
-      emailVerificationRequired: true,
     });
   } else {
     return res.status(400).json({
@@ -91,13 +86,6 @@ const loginOwner = asyncHandler(async (req, res) => {
 
   if (!isMatch) {
     return res.status(400).json({ message: "Invalid password" });
-  }
-
-  if (!owner.isEmailVerified) {
-    return res.status(403).json({
-      code: "EMAIL_NOT_VERIFIED",
-      message: "Please verify your email address before logging in.",
-    });
   }
 
   const token = jwt.sign(

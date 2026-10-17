@@ -54,10 +54,8 @@ const Register = () => {
         password: formData.password,
       });
 
-      toast.success("Check your email to verify your account.");
-      navigate(
-        `/verify-email?email=${encodeURIComponent(formData.email.trim())}`,
-      );
+      toast.success("Account created successfully. Please log in.");
+      navigate("/login");
     } catch (error) {
       toast.error(error.message || "Registration failed.");
     } finally {

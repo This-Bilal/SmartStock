@@ -30,21 +30,6 @@ const employeeSchema = new mongoose.Schema(
       required: true,
     },
 
-    isEmailVerified: {
-      type: Boolean,
-      default: true,
-    },
-
-    emailVerificationTokenHash: {
-      type: String,
-      select: false,
-    },
-
-    emailVerificationExpires: {
-      type: Date,
-      select: false,
-    },
-
     role: {
       type: String,
       enum: ["manager", "cashier"],
