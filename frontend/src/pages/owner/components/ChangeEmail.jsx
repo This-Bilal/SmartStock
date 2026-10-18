@@ -1,10 +1,10 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { IoMdEyeOff, IoMdEye } from "react-icons/io";
 import { changeEmail } from "../../../services/ownerService";
 import { useTitle } from "../../../hooks/useTitile";
 import BackButton from "../../../components/other/BackButton";
 import { useNavigate } from "react-router-dom";
-import { toast, Toaster } from "sonner";
+import { toast } from "sonner";
 
 const ChangeEmail = () => {
   useTitle("SmartStock: change email");
@@ -27,8 +27,9 @@ const ChangeEmail = () => {
 
       const data = await changeEmail(formData);
 
-      navigate("/ownerprofile")
-      toast.success(`Email successfully changed to ${data.email}.`)
+      window.localStorage.removeItem("user");
+      navigate("/login");
+      toast.success(data.message || `Email updated to ${data.email}. Verify it before logging in.`);
       setFormData({ password: "", newEmail: "" });
     } catch (error) {
       toast.error(error?.message || "Unable to change email.")

@@ -1,10 +1,12 @@
 const express = require('express')
 const { protect, authorize } = require('../middleware/authMiddleware')
-const { createEmployee, loginEmployee, getAllEmployees, getSingleEmployee, updateEmployee, toggleEmployeeStatus, logoutEmployee } = require('../controller/employeeController')
+const { createEmployee, loginEmployee, getAllEmployees, getSingleEmployee, updateEmployee, toggleEmployeeStatus, logoutEmployee, verifyEmployeeEmail, resendEmployeeVerification } = require('../controller/employeeController')
 const router = express.Router()
 
 router.post('/createEmployee', protect, authorize("owner"), createEmployee)
 router.post('/loginEmployee', loginEmployee)
+router.post('/verifyEmail', verifyEmployeeEmail)
+router.post('/resendVerification', resendEmployeeVerification)
 router.post('/logOutEmployee', logoutEmployee)
 router.get('/getAllEmployees', protect, authorize("owner"), getAllEmployees)
 router.get('/getAnEmployee/:id', protect, getSingleEmployee)

@@ -5,6 +5,11 @@ const cookieParser = require('cookie-parser')
 const cors = require('cors')
 const MONGO_URI = process.env.MONGO_URI
 const corsOption = require('./config/corsOption')
+const { initializeEmailService } = require('./services/emailService')
+
+initializeEmailService().catch((error) => {
+    console.error(`[email] ${error.message}`)
+})
 
 const cartRoutes = require('./routes/cartRoutes')
 const categoryRoutes = require('./routes/categoryRoutes')

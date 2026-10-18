@@ -18,7 +18,9 @@ export const getOwnerProfile = async () => {
 
     return transformedData
   } catch (error) {
-    throw new Error(error?.message || "Failed to get profile");
+    throw new Error(error?.message || "Failed to get profile", {
+      cause: error,
+    });
   }
 };
 
@@ -66,7 +68,9 @@ export const updateOwnerProfile = async (details) => {
 
     return transformedData
     } catch (error) {
-        throw new Error(error?.message || "Failed to update profile.")
+        throw new Error(error?.message || "Failed to update profile.", {
+            cause: error,
+        })
     }
 }
 
@@ -93,9 +97,11 @@ export const changeEmail = async (details) => {
 
         const transformedData = transformData(response)
 
-        return transformedData
+        return { ...transformedData, message: response.message }
     } catch (error) {
-        throw new Error(error.message || "Failed to change email.")
+        throw new Error(error.message || "Failed to change email.", {
+            cause: error,
+        })
     }
 }
 
@@ -127,7 +133,9 @@ export const changePassword = async (details) => {
 
         return response
     } catch (error) {
-        throw new Error(error.message || "Failed to change password.")
+        throw new Error(error.message || "Failed to change password.", {
+            cause: error,
+        })
     }
 }
 

@@ -6,6 +6,7 @@ const transformData = (employee) => ({
   email: employee.email,
   role: employee.role,
   isActive: employee.isActive,
+  isEmailVerified: employee.isEmailVerified,
 });
 
 // Normalising email
@@ -38,7 +39,9 @@ export const createEmployee = async (employeeDetails) => {
 
     return transformedData;
   } catch (error) {
-    throw new Error(error.message || "Failed to create employee");
+    throw new Error(error.message || "Failed to create employee", {
+      cause: error,
+    });
   }
 };
 
@@ -51,7 +54,9 @@ export const getAllEmployee = async () => {
 
     return transformedData;
   } catch (error) {
-    throw new Error(error.message || "Failed to get employees");
+    throw new Error(error.message || "Failed to get employees", {
+      cause: error,
+    });
   }
 };
 
@@ -69,7 +74,9 @@ export const getAnEmployee = async (employeeId) => {
     const transformedData = transformData(response);
     return transformedData;
   } catch (error) {
-    throw new Error(error.message || "Failed to get employee");
+    throw new Error(error.message || "Failed to get employee", {
+      cause: error,
+    });
   }
 };
 
@@ -122,9 +129,11 @@ export const updateEmployee = async (employeeId, employeeDetails) => {
 
     const transformedData = transformData(response);
 
-    return transformedData;
+    return { ...transformedData, message: response.message };
   } catch (error) {
-    throw new Error(error.message || "Failed to update employee");
+    throw new Error(error.message || "Failed to update employee", {
+      cause: error,
+    });
   }
 };
 
@@ -146,7 +155,9 @@ export const changeEmployeeStatus = async (employeeId) => {
 
     return transformedData;
   } catch (error) {
-    throw new Error(error.message || "Failed to change employee status");
+    throw new Error(error.message || "Failed to change employee status", {
+      cause: error,
+    });
   }
 };
 
@@ -158,3 +169,5 @@ const employeeService = {
     updateEmployee,
     changeEmployeeStatus
 }
+
+export default employeeService;

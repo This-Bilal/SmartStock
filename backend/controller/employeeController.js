@@ -5,6 +5,10 @@ const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const JWT_TOKEN = process.env.JWT_TOKEN;
 const { checkPlanLimit } = require("../services/subscriptionService");
+const {
+  sendVerificationEmail,
+  verifyEmail,
+} = require("../services/emailVerificationService");
 
 const createEmployee = asyncHandler(async (req, res) => {
   const { name, email, password, role } = req.body;
@@ -68,7 +72,10 @@ const createEmployee = asyncHandler(async (req, res) => {
     email: employeeEmail,
     password: hashedPassword,
     role,
+    isEmailVerified: false,
   });
+
+  await sendVerificationEmail(employee, "employee");
 
   return res.status(201).json({
     _id: employee._id,
@@ -106,6 +113,13 @@ const loginEmployee = asyncHandler(async (req, res) => {
   if (!isMatch) {
     return res.status(401).json({
       message: "Invalid email or password.",
+    });
+  }
+
+  if (!employee.isEmailVerified) {
+    return res.status(403).json({
+      message: "Please verify your email address before logging in.",
+      code: "EMAIL_NOT_VERIFIED",
     });
   }
 
@@ -161,6 +175,72 @@ const logoutEmployee = asyncHandler(async (req, res) => {
   });
 });
 
+const verifyEmployeeEmail = asyncHandler(async (req, res) => {
+  const employee = await verifyEmail(Employee, req.body.token);
+
+  if (!employee) {
+    return res.status(400).json({
+      message: "This verification link is invalid or has expired.",
+    });
+  }
+
+  if (!employee.isActive) {
+    return res.status(200).json({
+      message:
+        "Email verified successfully. Contact your employer to activate your account before logging in.",
+    });
+  }
+
+  const token = jwt.sign(
+    {
+      id: employee._id,
+      owner: employee.owner,
+      role: employee.role,
+    },
+    JWT_TOKEN,
+    { expiresIn: "1d" },
+  );
+
+  res.cookie("token", token, {
+    path: "/",
+    httpOnly: true,
+    expires: new Date(Date.now() + 1000 * 86400),
+    sameSite: "none",
+    secure: true,
+  });
+
+  return res.status(200).json({
+    _id: employee._id,
+    owner: employee.owner,
+    name: employee.name,
+    email: employee.email,
+    role: employee.role,
+    isActive: employee.isActive,
+    message: "Email verified successfully.",
+  });
+});
+
+const resendEmployeeVerification = asyncHandler(async (req, res) => {
+  const { email } = req.body;
+
+  if (!email || typeof email !== "string") {
+    return res.status(400).json({ message: "Email is required." });
+  }
+
+  const employee = await Employee.findOne({
+    email: email.trim().toLowerCase(),
+  });
+
+  if (employee && !employee.isEmailVerified) {
+    await sendVerificationEmail(employee, "employee");
+  }
+
+  return res.status(200).json({
+    message:
+      "If an unverified employee account exists for that address, a verification email has been sent.",
+  });
+});
+
 const getAllEmployees = asyncHandler(async (req, res) => {
   const employees = await Employee.find({ owner: req.user._id })
     .select("-password")
@@ -210,6 +290,7 @@ const updateEmployee = asyncHandler(async (req, res) => {
   }
 
   let hasChanges = false;
+  let emailChanged = false;
 
   if (name !== undefined) {
     if (!name.trim()) {
@@ -250,7 +331,9 @@ const updateEmployee = asyncHandler(async (req, res) => {
       }
 
       employee.email = normalisedEmail;
+      employee.isEmailVerified = false;
       hasChanges = true;
+      emailChanged = true;
     }
   }
 
@@ -276,7 +359,25 @@ const updateEmployee = asyncHandler(async (req, res) => {
 
   const updatedEmployee = await employee.save();
 
-  res.status(200).json(updatedEmployee);
+  if (emailChanged) {
+    await sendVerificationEmail(updatedEmployee, "employee");
+  }
+
+  const response = {
+    _id: updatedEmployee._id,
+    owner: updatedEmployee.owner,
+    name: updatedEmployee.name,
+    email: updatedEmployee.email,
+    role: updatedEmployee.role,
+    isActive: updatedEmployee.isActive,
+    isEmailVerified: updatedEmployee.isEmailVerified,
+  };
+  if (emailChanged) {
+    response.message =
+      "Employee email updated. A verification email was sent to the new address.";
+  }
+
+  res.status(200).json(response);
 });
 
 const toggleEmployeeStatus = asyncHandler(async (req, res) => {
@@ -346,4 +447,6 @@ module.exports = {
   getSingleEmployee,
   updateEmployee,
   toggleEmployeeStatus,
+  verifyEmployeeEmail,
+  resendEmployeeVerification,
 };

@@ -1,9 +1,13 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { loginEmployee, loginOwner } from "../services/authService";
+import {
+  loginEmployee,
+  loginOwner,
+  resendEmailVerification,
+} from "../services/authService";
 import { useTitle } from "../hooks/useTitile";
 import { IoMdEyeOff, IoMdEye } from "react-icons/io";
-import { Toaster, toast } from "sonner";
+import { toast } from "sonner";
 
 
 const Login = () => {
@@ -14,15 +18,13 @@ const Login = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loginType, setLoginType] = useState("employee");
-  const [success, setSuccess] = useState("")
-  const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+  const [resendingVerification, setResendingVerification] = useState(false);
 
   const handleLogin = async (e) => {
     e.preventDefault();
 
-    setError("");
     setLoading(true);
 
     try {
@@ -57,6 +59,18 @@ const Login = () => {
 
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleResendVerification = async () => {
+    setResendingVerification(true);
+    try {
+      const response = await resendEmailVerification(loginType, email);
+      toast.success(response.message);
+    } catch (error) {
+      toast.error(error.message || "Could not request a verification email.");
+    } finally {
+      setResendingVerification(false);
     }
   };
 
@@ -153,6 +167,15 @@ const Login = () => {
             {loading ? "Logging in..." : "Login"}
           </button>
         </form>
+
+        <button
+          type="button"
+          onClick={handleResendVerification}
+          disabled={resendingVerification || !email.trim()}
+          className="mt-3 w-full text-xs text-red-600 hover:underline disabled:cursor-not-allowed disabled:opacity-50 sm:text-sm"
+        >
+          {resendingVerification ? "Requesting email..." : "Resend verification email"}
+        </button>
 
         {/* REGISTER */}
         <p className="mt-4 text-center text-xs sm:mt-5 sm:text-sm">

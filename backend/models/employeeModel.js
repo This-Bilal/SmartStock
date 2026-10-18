@@ -25,6 +25,21 @@ const employeeSchema = new mongoose.Schema(
       ],
     },
 
+    isEmailVerified: {
+      type: Boolean,
+      default: true,
+    },
+
+    emailVerificationToken: {
+      type: String,
+      select: false,
+    },
+
+    emailVerificationExpiresAt: {
+      type: Date,
+      select: false,
+    },
+
     password: {
       type: String,
       required: true,

@@ -4,6 +4,10 @@ const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const JWT_TOKEN = process.env.JWT_TOKEN;
 const Subscription = require("../models/subscriptionModel");
+const {
+  sendVerificationEmail,
+  verifyEmail,
+} = require("../services/emailVerificationService");
 
 const registerOwner = asyncHandler(async (req, res) => {
   const { name, email, businessName, phone, password } = req.body;
@@ -42,6 +46,7 @@ const registerOwner = asyncHandler(async (req, res) => {
     businessName,
     phone,
     password: hashPassword,
+    isEmailVerified: false,
   });
 
   // Give the new business a Free subscription
@@ -50,6 +55,8 @@ const registerOwner = asyncHandler(async (req, res) => {
     plan: "free",
     status: "active",
   });
+
+  await sendVerificationEmail(owner, "owner");
 
   if (owner) {
     const { _id, name, email, businessName, phone, role } = owner;
@@ -86,6 +93,13 @@ const loginOwner = asyncHandler(async (req, res) => {
 
   if (!isMatch) {
     return res.status(400).json({ message: "Invalid password" });
+  }
+
+  if (!owner.isEmailVerified) {
+    return res.status(403).json({
+      message: "Please verify your email address before logging in.",
+      code: "EMAIL_NOT_VERIFIED",
+    });
   }
 
   const token = jwt.sign(
@@ -251,11 +265,74 @@ const changeOwnerEmail = asyncHandler(async (req, res) => {
   }
 
   owner.email = formatedEmail;
+  owner.isEmailVerified = false;
 
   await owner.save();
+  await sendVerificationEmail(owner, "owner");
 
   const { _id, name, email, businessName, phone, role } = owner;
-  return res.status(200).json({ _id, name, email, businessName, phone, role });
+  return res.status(200).json({
+    _id,
+    name,
+    email,
+    businessName,
+    phone,
+    role,
+    message: "Email updated. Check your inbox to verify the new address.",
+  });
+});
+
+const verifyOwnerEmail = asyncHandler(async (req, res) => {
+  const owner = await verifyEmail(Owner, req.body.token);
+
+  if (!owner) {
+    return res.status(400).json({
+      message: "This verification link is invalid or has expired.",
+    });
+  }
+
+  const token = jwt.sign(
+    { id: owner._id, role: owner.role },
+    JWT_TOKEN,
+    { expiresIn: "1d" },
+  );
+
+  res.cookie("token", token, {
+    path: "/",
+    httpOnly: true,
+    expires: new Date(Date.now() + 1000 * 86400),
+    sameSite: "none",
+    secure: true,
+  });
+
+  return res.status(200).json({
+    _id: owner._id,
+    name: owner.name,
+    email: owner.email,
+    businessName: owner.businessName,
+    phone: owner.phone,
+    role: owner.role,
+    message: "Email verified successfully.",
+  });
+});
+
+const resendOwnerVerification = asyncHandler(async (req, res) => {
+  const { email } = req.body;
+
+  if (!email || typeof email !== "string") {
+    return res.status(400).json({ message: "Email is required." });
+  }
+
+  const owner = await Owner.findOne({ email: email.trim().toLowerCase() });
+
+  if (owner && !owner.isEmailVerified) {
+    await sendVerificationEmail(owner, "owner");
+  }
+
+  return res.status(200).json({
+    message:
+      "If an unverified owner account exists for that address, a verification email has been sent.",
+  });
 });
 
 const changeOwnerPassword = asyncHandler(async (req, res) => {
@@ -316,4 +393,6 @@ module.exports = {
   updateOwnerProfile,
   changeOwnerEmail,
   changeOwnerPassword,
+  verifyOwnerEmail,
+  resendOwnerVerification,
 };

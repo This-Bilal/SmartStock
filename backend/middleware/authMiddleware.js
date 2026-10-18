@@ -41,6 +41,13 @@ const protect = asyncHandler(async (req, res, next) => {
             });
         }
 
+        if (!user.isEmailVerified) {
+            return res.status(403).json({
+                message: "Please verify your email address before continuing.",
+                code: "EMAIL_NOT_VERIFIED"
+            });
+        }
+
         // Attach authenticated user
         req.user = user;
 

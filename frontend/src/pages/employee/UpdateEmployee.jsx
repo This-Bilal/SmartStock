@@ -1,9 +1,9 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { getAnEmployee, updateEmployee } from "../../services/employeeService";
 import BackButton from "../../components/other/BackButton";
 import { useTitle } from "../../hooks/useTitile";
-import { toast, Toaster } from "sonner";
+import { toast } from "sonner";
 
 const UpdateEmployee = () => {
   useTitle("SmartStock: update employee");
@@ -77,7 +77,7 @@ const UpdateEmployee = () => {
       
       navigate("/employeeList")
 
-      toast.success("Employee updated successfully.")
+      toast.success(updatedEmployee.message || "Employee updated successfully.")
     } catch (error) {
       toast.error(error.message || "Failed to update employee.")
     } finally {
@@ -103,7 +103,7 @@ const UpdateEmployee = () => {
         <div className="mx-auto w-full max-w-2xl px-4 py-10 sm:px-6 sm:py-12">
           <div className="rounded-xl bg-red-50 p-4 text-center sm:p-5">
             <p className="text-xs text-red-600 sm:text-sm">
-              {error || "Employee not found."}
+              Employee not found.
             </p>
           </div>
         </div>

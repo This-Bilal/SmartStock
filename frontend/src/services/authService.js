@@ -55,11 +55,9 @@ export const registerOwner = async (ownerDetails) => {
 
     return data;
   } catch (error) {
-    throw new Error (
-      error?.message || {
-        message: "Owner registration failed.",
-      }
-    );
+    throw new Error(error?.message || "Owner registration failed.", {
+      cause: error,
+    });
   }
 };
 
@@ -87,11 +85,9 @@ export const loginOwner = async (authDetails) => {
 
     return transformedData;
   } catch (error) {
-    throw new Error (
-      error?.message || {
-        message: "Owner login failed.",
-      }
-    );
+    throw new Error(error?.message || "Owner login failed.", {
+      cause: error,
+    });
   }
 };
 
@@ -119,12 +115,52 @@ export const loginEmployee = async (authDetails) => {
 
     return transformedData;
   } catch (error) {
-    throw new Error (
-      error?.message || {
-        message: "Employee login failed.",
-      }
-    );
+    throw new Error(error?.message || "Employee login failed.", {
+      cause: error,
+    });
   }
+};
+
+export const verifyEmail = async (accountType, token) => {
+  const endpoint =
+    accountType === "owner"
+      ? OWNER_ENDPOINTS.VERIFY_EMAIL
+      : accountType === "employee"
+        ? EMPLOYEE_ENDPOINTS.VERIFY_EMAIL
+        : null;
+
+  if (!endpoint || !token) {
+    throw new Error("Invalid email verification link.");
+  }
+
+  const data = await apiRequest(endpoint, {
+    method: "POST",
+    body: { token },
+  });
+
+  if (data.role) {
+    storeUser(transformUser(data));
+  }
+
+  return data;
+};
+
+export const resendEmailVerification = async (accountType, email) => {
+  const endpoint =
+    accountType === "owner"
+      ? OWNER_ENDPOINTS.RESEND_VERIFICATION
+      : accountType === "employee"
+        ? EMPLOYEE_ENDPOINTS.RESEND_VERIFICATION
+        : null;
+
+  if (!endpoint || !email?.trim()) {
+    throw new Error("Select an account type and enter your email address.");
+  }
+
+  return apiRequest(endpoint, {
+    method: "POST",
+    body: { email: normaliseEmail(email) },
+  });
 };
 
 /**
@@ -142,11 +178,9 @@ export const logoutOwner = async () => {
   } catch (error) {
     clearUser();
 
-    throw new Error (
-      error?.message || {
-        message: "Owner logout failed.",
-      }
-    );
+    throw new Error(error?.message || "Owner logout failed.", {
+      cause: error,
+    });
   }
 };
 
@@ -165,11 +199,9 @@ export const logoutEmployee = async () => {
   } catch (error) {
     clearUser();
 
-    throw new Error (
-      error?.message || {
-        message: "Employee logout failed.",
-      }
-    );
+    throw new Error(error?.message || "Employee logout failed.", {
+      cause: error,
+    });
   }
 };
 
@@ -180,7 +212,7 @@ export const checkLoginStatus = async () => {
     })
 
     return Boolean(response)
-  } catch (error) {
+  } catch {
     return false
   }
 }
@@ -190,6 +222,8 @@ const authService = {
   loginOwner,
   logoutOwner,
   loginEmployee,
+  verifyEmail,
+  resendEmailVerification,
   logoutEmployee,
   checkLoginStatus
 };

@@ -44,6 +44,8 @@ export const CATEGORY_ENDPOINTS = {
 export const EMPLOYEE_ENDPOINTS = {
   CREATE_EMPLOYEE: api("employee/createEmployee"),
   LOGIN_EMPLOYEE: api("employee/loginEmployee"),
+  VERIFY_EMAIL: api("employee/verifyEmail"),
+  RESEND_VERIFICATION: api("employee/resendVerification"),
   LOGOUT_EMPLOYEE: api("employee/logOutEmployee"),
   GET_ALL_EMPLOYEE: api("employee/getAllEmployees"),
   GET_SINGLE_EMPLOYEE: (id) => api(`employee/getAnEmployee/${id}`),
@@ -63,6 +65,8 @@ export const INVENTORY_ENDPOINTS = {
 export const OWNER_ENDPOINTS = {
   REGISTER_OWNER: api("owner/registerOwner"),
   LOGIN_OWNER: api("owner/loginOwner"),
+  VERIFY_EMAIL: api("owner/verifyEmail"),
+  RESEND_VERIFICATION: api("owner/resendVerification"),
   LOGOUT_OWNER: api("owner/logoutOwner"),
   GET_OWNER_PROFILE: api("owner/getOwnerProfile"),
   UPDATE_OWNER_PROFILE: api("owner/updateOwnerProfile"),
@@ -174,12 +178,13 @@ export const apiRequest = async (url, options = {}) => {
           error.response.data?.message ||
           `HTTP error! status: ${error.response.status}`;
 
-        throw new Error(message);
+        throw new Error(message, { cause: error });
       }
 
       if (error.request) {
         throw new Error(
           "Unable to connect to the server. Please make sure that the backend server is running on the required port.",
+          { cause: error },
         );
       }
     }

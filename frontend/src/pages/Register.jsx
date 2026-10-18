@@ -1,9 +1,9 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { registerOwner } from "../services/authService";
 import { useTitle } from "../hooks/useTitile";
 import { IoMdEyeOff, IoMdEye } from "react-icons/io";
-import { Toaster, toast } from "sonner";
+import { toast } from "sonner";
 
 const Register = () => {
   useTitle("Rigister for SmartStock");
@@ -21,7 +21,6 @@ const Register = () => {
     confirmPassword: "",
   });
 
-  const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
   const handleChange = (e) => {
@@ -35,8 +34,6 @@ const Register = () => {
 
   const handleRegister = async (e) => {
     e.preventDefault();
-
-    setError("");
 
     if (formData.password !== formData.confirmPassword) {
       toast.error("Passwords do not match.");
@@ -54,7 +51,7 @@ const Register = () => {
         password: formData.password,
       });
 
-      toast.success("Account created successfully. Please log in.");
+      toast.success("Account created. Check your inbox to verify your email before logging in.");
       navigate("/login");
     } catch (error) {
       toast.error(error.message || "Registration failed.");

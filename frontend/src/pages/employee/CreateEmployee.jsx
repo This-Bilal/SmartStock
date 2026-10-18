@@ -1,10 +1,10 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { createEmployee } from "../../services/employeeService";
 import { IoMdEyeOff, IoMdEye } from "react-icons/io";
 import BackButton from "../../components/other/BackButton";
 import { useTitle } from "../../hooks/useTitile";
-import { toast, Toaster } from "sonner";
+import { toast } from "sonner";
 
 const CreateEmployee = () => {
   useTitle("SmartStock: add employee");
@@ -40,7 +40,7 @@ const CreateEmployee = () => {
     try {
       await createEmployee(formData);
 
-      toast.success("Employee created successfully.");
+      toast.success("Employee created. A verification email has been sent to them.");
 
       setTimeout(() => {
         navigate("/employeeList");
