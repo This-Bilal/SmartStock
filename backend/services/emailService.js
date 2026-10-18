@@ -39,12 +39,15 @@ const createEmailService = ({
           await transporter.verify();
           logger.info("[email] SMTP transporter verified.");
           return true;
-        } catch {
+        } catch (error) {
           transporter = undefined;
+          const details = getSafeErrorDetails(error);
           logger.error(
-            "[email] SMTP transporter initialization failed; check SMTP configuration and availability.",
+            `[email] SMTP transporter initialization failed (${details}).`,
           );
-          throw new Error("Email SMTP transporter verification failed.");
+          throw new Error(
+            `Email SMTP transporter verification failed (${details}).`,
+          );
         }
       })();
     }
@@ -71,9 +74,10 @@ const createEmailService = ({
         ...message,
         from: message.from || config.from,
       });
-    } catch {
-      logger.error("[email] Email delivery failed.");
-      throw new Error("Email delivery failed.");
+    } catch (error) {
+      const details = getSafeErrorDetails(error);
+      logger.error(`[email] Email delivery failed (${details}).`);
+      throw new Error(`Email delivery failed (${details}).`);
     }
   };
 
@@ -81,6 +85,18 @@ const createEmailService = ({
     initialize,
     sendEmail,
   };
+};
+
+const getSafeErrorDetails = (error) => {
+  const code =
+    typeof error?.code === "string" && /^[A-Z0-9_]+$/.test(error.code)
+      ? error.code
+      : "UNKNOWN";
+  const responseCode = Number.isInteger(error?.responseCode)
+    ? `response ${error.responseCode}`
+    : null;
+
+  return [code, responseCode].filter(Boolean).join(", ");
 };
 
 const emailService = createEmailService();

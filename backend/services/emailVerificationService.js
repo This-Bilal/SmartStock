@@ -9,15 +9,6 @@ const createEmailVerificationService = ({
   now = () => new Date(),
 } = {}) => {
   const sendVerificationEmail = async (user, accountType) => {
-    if (
-      environment.NODE_ENV === "production" &&
-      !environment.EMAIL_VERIFICATION_URL
-    ) {
-      throw new Error(
-        "EMAIL_VERIFICATION_URL is required in production.",
-      );
-    }
-
     const verificationUrl = new URL(
       environment.EMAIL_VERIFICATION_URL || "https://smart-stock-beta.vercel.app/verify-email",
     );

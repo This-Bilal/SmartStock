@@ -222,11 +222,11 @@ Create a `.env` file containing your database, JWT, Paystack, and application co
 | `EMAIL_USER` | SMTP username |
 | `EMAIL_PASSWORD` | SMTP password |
 | `EMAIL_FROM` | Sender address; defaults to `EMAIL_USER`, then `noreply@smartstock.com` |
-| `EMAIL_VERIFICATION_URL` | Frontend verification page; defaults to `http://localhost:5173/verify-email`. Set this to your deployed frontend URL in production. |
+| `EMAIL_VERIFICATION_URL` | Frontend verification page; defaults to the deployed SmartStock verification page. Set this to `http://localhost:5173/verify-email` for local testing or to your own deployed frontend URL. |
 
 For Gmail, use an app password rather than your Google account password. Email delivery is disabled with a development-mode notice when SMTP credentials are not configured in development. Configure both `EMAIL_USER` and `EMAIL_PASSWORD` to enable delivery. Owner registration and employee creation send a verification link that expires after 24 hours; unverified accounts cannot log in. Opening a valid verification link verifies the address and signs the account in. Users can request a replacement link from the login page. Never commit real credentials.
 
-When deploying, set `EMAIL_VERIFICATION_URL` to the public frontend URL ending in `/verify-email`, so links open the deployed verification page rather than localhost.
+When deploying a custom frontend, set `EMAIL_VERIFICATION_URL` to its public URL ending in `/verify-email`.
 
 ### 4. Start the backend
 

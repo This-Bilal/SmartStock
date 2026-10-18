@@ -10,7 +10,7 @@ const createLogger = () => {
     entries,
     info: (message) => entries.push(["info", message]),
     warn: (message) => entries.push(["warn", message]),
-    error: (message) => entries.push(["error", message]),
+    error: (message, details) => entries.push(["error", message, details]),
   };
 };
 
@@ -156,7 +156,10 @@ test("SMTP verification and send failures are logged and rejected", async () => 
     mailer: {
       createTransport: () => ({
         verify: async () => {
-          throw new Error("secret must not be logged");
+          const error = new Error("secret must not be logged");
+          error.code = "EAUTH";
+          error.responseCode = 535;
+          throw error;
         },
       }),
     },
@@ -164,9 +167,10 @@ test("SMTP verification and send failures are logged and rejected", async () => 
   });
   await assert.rejects(
     verificationFailure.initialize(),
-    /Email SMTP transporter verification failed/,
+    /Email SMTP transporter verification failed \(EAUTH, response 535\)/,
   );
   assert.equal(logger.entries[0][0], "error");
+  assert.match(logger.entries[0][1], /EAUTH, response 535/);
   assert.doesNotMatch(logger.entries[0][1], /secret/);
 
   const sendFailure = createEmailService({
@@ -178,7 +182,10 @@ test("SMTP verification and send failures are logged and rejected", async () => 
       createTransport: () => ({
         verify: async () => {},
         sendMail: async () => {
-          throw new Error("secret must not be logged");
+          const error = new Error("secret must not be logged");
+          error.code = "EAUTH";
+          error.responseCode = 535;
+          throw error;
         },
       }),
     },
@@ -190,8 +197,9 @@ test("SMTP verification and send failures are logged and rejected", async () => 
       subject: "Test",
       text: "Hi",
     }),
-    /Email delivery failed/,
+    /Email delivery failed \(EAUTH, response 535\)/,
   );
   assert.equal(logger.entries.at(-1)[0], "error");
+  assert.match(logger.entries.at(-1)[1], /EAUTH, response 535/);
   assert.doesNotMatch(logger.entries.at(-1)[1], /secret/);
 });

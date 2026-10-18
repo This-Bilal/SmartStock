@@ -56,7 +56,16 @@ const registerOwner = asyncHandler(async (req, res) => {
     status: "active",
   });
 
-  await sendVerificationEmail(owner, "owner");
+  try {
+    await sendVerificationEmail(owner, "owner");
+  } catch {
+    console.error("[email] Owner verification email could not be sent.");
+    return res.status(503).json({
+      message:
+        "Your account was created, but the verification email could not be sent. Please try resending it later.",
+      code: "VERIFICATION_EMAIL_FAILED",
+    });
+  }
 
   if (owner) {
     const { _id, name, email, businessName, phone, role } = owner;

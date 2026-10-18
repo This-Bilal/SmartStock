@@ -53,18 +53,21 @@ test("verification email stores only a hashed expiring token and includes a safe
   assert.match(messages[0].html, /<p>Hello Test Owner &lt;script&gt;,<\/p>/);
 });
 
-test("production requires an explicit public verification URL", async () => {
+test("production uses the deployed verification URL when no override is configured", async () => {
   const user = createUser();
+  const messages = [];
   const service = createEmailVerificationService({
-    send: async () => assert.fail("must not send email"),
+    send: async (message) => messages.push(message),
     environment: { NODE_ENV: "production" },
   });
 
-  await assert.rejects(
-    service.sendVerificationEmail(user, "owner"),
-    /EMAIL_VERIFICATION_URL is required in production/,
-  );
-  assert.equal(user.saveCalls, 0);
+  await service.sendVerificationEmail(user, "owner");
+
+  const link = new URL(messages[0].text.match(/https:\/\/\S+/)[0]);
+  assert.equal(link.origin, "https://smart-stock-beta.vercel.app");
+  assert.equal(link.pathname, "/verify-email");
+  assert.equal(link.searchParams.get("type"), "owner");
+  assert.equal(user.saveCalls, 1);
 });
 
 test("verification consumes a valid token once and rejects invalid or expired tokens", async () => {
