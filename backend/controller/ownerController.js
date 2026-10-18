@@ -277,7 +277,16 @@ const changeOwnerEmail = asyncHandler(async (req, res) => {
   owner.isEmailVerified = false;
 
   await owner.save();
-  await sendVerificationEmail(owner, "owner");
+  try {
+    await sendVerificationEmail(owner, "owner");
+  } catch {
+    console.error("[email] Owner verification email could not be sent.");
+    return res.status(503).json({
+      message:
+        "The email was updated, but the verification email could not be sent. Please resend it later.",
+      code: "VERIFICATION_EMAIL_FAILED",
+    });
+  }
 
   const { _id, name, email, businessName, phone, role } = owner;
   return res.status(200).json({
@@ -335,7 +344,15 @@ const resendOwnerVerification = asyncHandler(async (req, res) => {
   const owner = await Owner.findOne({ email: email.trim().toLowerCase() });
 
   if (owner && !owner.isEmailVerified) {
-    await sendVerificationEmail(owner, "owner");
+    try {
+      await sendVerificationEmail(owner, "owner");
+    } catch {
+      console.error("[email] Owner verification email could not be resent.");
+      return res.status(503).json({
+        message: "The verification email could not be sent. Please try again later.",
+        code: "VERIFICATION_EMAIL_FAILED",
+      });
+    }
   }
 
   return res.status(200).json({

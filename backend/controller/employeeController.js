@@ -75,7 +75,16 @@ const createEmployee = asyncHandler(async (req, res) => {
     isEmailVerified: false,
   });
 
-  await sendVerificationEmail(employee, "employee");
+  try {
+    await sendVerificationEmail(employee, "employee");
+  } catch {
+    console.error("[email] Employee verification email could not be sent.");
+    return res.status(503).json({
+      message:
+        "The employee account was created, but the verification email could not be sent. Please resend it later.",
+      code: "VERIFICATION_EMAIL_FAILED",
+    });
+  }
 
   return res.status(201).json({
     _id: employee._id,
@@ -232,7 +241,15 @@ const resendEmployeeVerification = asyncHandler(async (req, res) => {
   });
 
   if (employee && !employee.isEmailVerified) {
-    await sendVerificationEmail(employee, "employee");
+    try {
+      await sendVerificationEmail(employee, "employee");
+    } catch {
+      console.error("[email] Employee verification email could not be resent.");
+      return res.status(503).json({
+        message: "The verification email could not be sent. Please try again later.",
+        code: "VERIFICATION_EMAIL_FAILED",
+      });
+    }
   }
 
   return res.status(200).json({
@@ -360,7 +377,16 @@ const updateEmployee = asyncHandler(async (req, res) => {
   const updatedEmployee = await employee.save();
 
   if (emailChanged) {
-    await sendVerificationEmail(updatedEmployee, "employee");
+    try {
+      await sendVerificationEmail(updatedEmployee, "employee");
+    } catch {
+      console.error("[email] Employee verification email could not be sent.");
+      return res.status(503).json({
+        message:
+          "Employee details were updated, but the verification email could not be sent. Please resend it later.",
+        code: "VERIFICATION_EMAIL_FAILED",
+      });
+    }
   }
 
   const response = {

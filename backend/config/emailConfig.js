@@ -1,22 +1,15 @@
 const getEmailConfig = (environment = process.env) => {
-  const rawPort = environment.EMAIL_PORT || "587";
-  const port = Number(rawPort);
-
-  if (!Number.isInteger(port) || port < 1 || port > 65535) {
-    throw new Error("EMAIL_PORT must be an integer between 1 and 65535.");
-  }
-
-  const user = environment.EMAIL_USER || "";
-  const password = environment.EMAIL_PASSWORD || "";
+  const apiKey = environment.BREVO_API_KEY || "";
 
   return {
-    host: environment.EMAIL_HOST || "smtp.gmail.com",
-    port,
-    secure: environment.EMAIL_SECURE === "true",
-    user,
-    password,
-    from: environment.EMAIL_FROM || user || "noreply@smartstock.com",
-    hasCredentials: Boolean(user && password),
+    apiKey,
+    from: environment.EMAIL_FROM || "noreply@smartstock.com",
+    hasSender: Boolean(environment.EMAIL_FROM),
+    fromName: environment.EMAIL_FROM_NAME || "SmartStock",
+    verificationUrl:
+      environment.EMAIL_VERIFICATION_URL ||
+      "https://smart-stock-beta.vercel.app/verify-email",
+    hasCredentials: Boolean(apiKey),
     isDevelopment:
       !environment.NODE_ENV ||
       environment.NODE_ENV === "development" ||

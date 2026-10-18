@@ -1,83 +1,103 @@
-const nodemailer = require("nodemailer");
 const { getEmailConfig } = require("../config/emailConfig");
 
 const createEmailService = ({
   environment = process.env,
-  mailer = nodemailer,
+  fetchImpl = globalThis.fetch,
   logger = console,
 } = {}) => {
   const config = getEmailConfig(environment);
-  let transporter;
-  let initialization;
+  let missingKeyWarningLogged = false;
 
   const initialize = async () => {
-    if (!initialization) {
-      initialization = (async () => {
-        if (!config.hasCredentials) {
-          if (!config.isDevelopment) {
-            throw new Error(
-              "EMAIL_USER and EMAIL_PASSWORD are required outside development.",
-            );
-          }
-
+    if (!config.hasCredentials) {
+      if (config.isDevelopment) {
+        if (!missingKeyWarningLogged) {
           logger.warn(
-            "[email] SMTP credentials are not configured; email delivery is disabled in development.",
+            "[email] BREVO_API_KEY is not configured; email delivery is disabled in development.",
           );
-          return false;
+          missingKeyWarningLogged = true;
         }
+        return false;
+      }
 
-        try {
-          transporter = mailer.createTransport({
-            host: config.host,
-            port: config.port,
-            secure: config.secure,
-            auth: {
-              user: config.user,
-              pass: config.password,
-            },
-          });
-          await transporter.verify();
-          logger.info("[email] SMTP transporter verified.");
-          return true;
-        } catch (error) {
-          transporter = undefined;
-          const details = getSafeErrorDetails(error);
-          logger.error(
-            `[email] SMTP transporter initialization failed (${details}).`,
-          );
-          throw new Error(
-            `Email SMTP transporter verification failed (${details}).`,
-          );
-        }
-      })();
+      throw new Error("BREVO_API_KEY is required to send email.");
     }
 
-    try {
-      return await initialization;
-    } catch (error) {
-      initialization = undefined;
-      throw error;
+    if (!config.isDevelopment && !config.hasSender) {
+      throw new Error(
+        "EMAIL_FROM must be set to a sender address verified in Brevo.",
+      );
     }
+
+    if (typeof fetchImpl !== "function") {
+      throw new Error("Email delivery requires a runtime with the Fetch API.");
+    }
+
+    return true;
   };
 
   const sendEmail = async (message) => {
     const ready = await initialize();
 
-    if (!ready || !transporter) {
+    if (!ready) {
       throw new Error(
-        "Email delivery is disabled because SMTP credentials are not configured.",
+        "Email delivery is disabled because BREVO_API_KEY is not configured.",
       );
     }
 
+    const recipients = normalizeRecipients(message.to);
+    if (!message.subject || (!message.text && !message.html)) {
+      throw new Error("Email subject and message content are required.");
+    }
+
+    const payload = {
+      sender: {
+        email: config.from,
+        name: config.fromName,
+      },
+      to: recipients,
+      subject: message.subject,
+      textContent: message.text || stripHtml(message.html),
+      htmlContent: message.html || textToHtml(message.text),
+      ...(message.replyTo
+        ? { replyTo: normalizeSender(message.replyTo) }
+        : {}),
+    };
+
     try {
-      return await transporter.sendMail({
-        ...message,
-        from: message.from || config.from,
+      const response = await fetchImpl("https://api.brevo.com/v3/smtp/email", {
+        method: "POST",
+        headers: {
+          accept: "application/json",
+          "api-key": config.apiKey,
+          "content-type": "application/json",
+        },
+        body: JSON.stringify(payload),
       });
+
+      if (!response.ok) {
+        logger.error(
+          `[email] Brevo rejected email delivery (HTTP ${response.status}).`,
+        );
+        throw new Error(
+          `Brevo email API request failed (HTTP ${response.status}).`,
+        );
+      }
+
+      const result = await response.json();
+      logger.info("[email] Email accepted by Brevo.");
+      return result;
     } catch (error) {
+      if (
+        error instanceof Error &&
+        error.message.startsWith("Brevo email API")
+      ) {
+        throw error;
+      }
+
       const details = getSafeErrorDetails(error);
-      logger.error(`[email] Email delivery failed (${details}).`);
-      throw new Error(`Email delivery failed (${details}).`);
+      logger.error(`[email] Brevo email request failed (${details}).`);
+      throw new Error(`Brevo email delivery failed (${details}).`);
     }
   };
 
@@ -87,16 +107,78 @@ const createEmailService = ({
   };
 };
 
+const normalizeRecipients = (to) => {
+  const recipients = Array.isArray(to) ? to : [to];
+
+  if (
+    recipients.length === 0 ||
+    recipients.some(
+      (recipient) =>
+        !isValidEmail(
+          typeof recipient === "string" ? recipient : recipient?.email,
+        ),
+    )
+  ) {
+    throw new Error("A valid email recipient is required.");
+  }
+
+  return recipients.map((recipient) =>
+    typeof recipient === "string"
+      ? { email: recipient }
+      : {
+          email: recipient.email,
+          ...(recipient.name ? { name: recipient.name } : {}),
+        },
+  );
+};
+
+const normalizeSender = (sender) => {
+  if (typeof sender === "string") {
+    if (!isValidEmail(sender)) {
+      throw new Error("Reply-to must be a valid email address.");
+    }
+    return { email: sender };
+  }
+
+  if (!sender || !isValidEmail(sender.email)) {
+    throw new Error("Reply-to must be a valid email address.");
+  }
+
+  return {
+    email: sender.email,
+    ...(sender.name ? { name: sender.name } : {}),
+  };
+};
+
+const isValidEmail = (email) =>
+  typeof email === "string" && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+
+const stripHtml = (html) => String(html || "").replace(/<[^>]*>/g, " ");
+
+const textToHtml = (text) =>
+  `<p>${String(text || "")
+    .replace(/[&<>"']/g, (character) => {
+      const entities = {
+        "&": "&amp;",
+        "<": "&lt;",
+        ">": "&gt;",
+        '"': "&quot;",
+        "'": "&#39;",
+      };
+      return entities[character];
+    })
+    .replace(/\r?\n/g, "<br>")}</p>`;
+
 const getSafeErrorDetails = (error) => {
   const code =
-    typeof error?.code === "string" && /^[A-Z0-9_]+$/.test(error.code)
+    typeof error?.cause?.code === "string" &&
+    /^[A-Z0-9_]+$/.test(error.cause.code)
+      ? error.cause.code
+      : typeof error?.code === "string" && /^[A-Z0-9_]+$/.test(error.code)
       ? error.code
       : "UNKNOWN";
-  const responseCode = Number.isInteger(error?.responseCode)
-    ? `response ${error.responseCode}`
-    : null;
 
-  return [code, responseCode].filter(Boolean).join(", ");
+  return code;
 };
 
 const emailService = createEmailService();

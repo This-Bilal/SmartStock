@@ -10,196 +10,214 @@ const createLogger = () => {
     entries,
     info: (message) => entries.push(["info", message]),
     warn: (message) => entries.push(["warn", message]),
-    error: (message, details) => entries.push(["error", message, details]),
+    error: (message) => entries.push(["error", message]),
   };
 };
 
-test("email configuration applies SMTP defaults and sender precedence", () => {
+test("email configuration reads Brevo credentials and sender settings", () => {
   const defaults = getEmailConfig({});
-  assert.equal(defaults.host, "smtp.gmail.com");
-  assert.equal(defaults.port, 587);
-  assert.equal(defaults.secure, false);
+  assert.equal(defaults.apiKey, "");
   assert.equal(defaults.from, "noreply@smartstock.com");
+  assert.equal(defaults.hasSender, false);
+  assert.equal(defaults.fromName, "SmartStock");
+  assert.equal(
+    defaults.verificationUrl,
+    "https://smart-stock-beta.vercel.app/verify-email",
+  );
   assert.equal(defaults.hasCredentials, false);
 
   const configured = getEmailConfig({
-    EMAIL_HOST: "mail.example.test",
-    EMAIL_PORT: "465",
-    EMAIL_SECURE: "true",
-    EMAIL_USER: "mailer@example.test",
-    EMAIL_PASSWORD: "secret",
+    BREVO_API_KEY: "brevo-secret",
+    EMAIL_FROM: "verified@example.test",
+    EMAIL_FROM_NAME: "Example Stock",
+    EMAIL_VERIFICATION_URL: "https://app.example.test/verify-email",
   });
-  assert.equal(configured.host, "mail.example.test");
-  assert.equal(configured.port, 465);
-  assert.equal(configured.secure, true);
-  assert.equal(configured.from, "mailer@example.test");
-  assert.equal(configured.hasCredentials, true);
+  assert.equal(configured.apiKey, "brevo-secret");
+  assert.equal(configured.from, "verified@example.test");
+  assert.equal(configured.hasSender, true);
+  assert.equal(configured.fromName, "Example Stock");
   assert.equal(
-    getEmailConfig({
-      EMAIL_USER: "mailer@example.test",
-      EMAIL_PASSWORD: "secret",
-      EMAIL_FROM: "custom@example.test",
-    }).from,
-    "custom@example.test",
+    configured.verificationUrl,
+    "https://app.example.test/verify-email",
   );
+  assert.equal(configured.hasCredentials, true);
 });
 
-test("EMAIL_SECURE is true only for the exact string true", () => {
-  assert.equal(getEmailConfig({ EMAIL_SECURE: "TRUE" }).secure, false);
-  assert.equal(getEmailConfig({ EMAIL_SECURE: "1" }).secure, false);
-});
-
-test("invalid SMTP ports are rejected", () => {
-  assert.throws(
-    () => getEmailConfig({ EMAIL_PORT: "not-a-port" }),
-    /EMAIL_PORT must be an integer/,
-  );
-});
-
-test("email service verifies one reusable transporter and sends from the configured address", async () => {
+test("email service sends Brevo transactional email with API-key authentication", async () => {
   const logger = createLogger();
-  const sentMessages = [];
-  let createTransportCalls = 0;
-  let verifyCalls = 0;
-  const mailer = {
-    createTransport: (options) => {
-      createTransportCalls += 1;
-      assert.deepEqual(options, {
-        host: "smtp.gmail.com",
-        port: 587,
-        secure: false,
-        auth: { user: "mailer@example.test", pass: "secret" },
-      });
-      return {
-        verify: async () => {
-          verifyCalls += 1;
-        },
-        sendMail: async (message) => {
-          sentMessages.push(message);
-          return { messageId: "test-id" };
-        },
-      };
-    },
-  };
+  const requests = [];
   const service = createEmailService({
     environment: {
-      EMAIL_USER: "mailer@example.test",
-      EMAIL_PASSWORD: "secret",
+      NODE_ENV: "production",
+      BREVO_API_KEY: "brevo-secret",
+      EMAIL_FROM: "verified@example.test",
+      EMAIL_FROM_NAME: "SmartStock Mail",
     },
-    mailer,
+    fetchImpl: async (...args) => {
+      requests.push(args);
+      return {
+        ok: true,
+        status: 201,
+        json: async () => ({ messageId: "brevo-message-id" }),
+      };
+    },
     logger,
   });
 
-  const firstResult = await service.sendEmail({
-    to: "owner@example.test",
-    subject: "Welcome",
-    text: "Welcome to SmartStock",
-  });
-  const secondResult = await service.sendEmail({
-    to: "other@example.test",
-    subject: "Notice",
-    html: "<p>Notice</p>",
+  const result = await service.sendEmail({
+    to: { email: "owner@example.test", name: "Owner" },
+    subject: "Verify your email",
+    text: "Open the link.",
+    html: "<p>Open the link.</p>",
+    replyTo: "support@example.test",
   });
 
-  assert.equal(firstResult.messageId, "test-id");
-  assert.equal(secondResult.messageId, "test-id");
-  assert.equal(createTransportCalls, 1);
-  assert.equal(verifyCalls, 1);
-  assert.equal(sentMessages[0].from, "mailer@example.test");
-  assert.equal(sentMessages[1].from, "mailer@example.test");
+  assert.deepEqual(result, { messageId: "brevo-message-id" });
+  assert.equal(requests.length, 1);
+  assert.equal(requests[0][0], "https://api.brevo.com/v3/smtp/email");
+  assert.equal(requests[0][1].method, "POST");
+  assert.equal(requests[0][1].headers["api-key"], "brevo-secret");
+  assert.equal(requests[0][1].headers["content-type"], "application/json");
+  assert.deepEqual(JSON.parse(requests[0][1].body), {
+    sender: { email: "verified@example.test", name: "SmartStock Mail" },
+    to: [{ email: "owner@example.test", name: "Owner" }],
+    subject: "Verify your email",
+    textContent: "Open the link.",
+    htmlContent: "<p>Open the link.</p>",
+    replyTo: { email: "support@example.test" },
+  });
+  assert.equal(logger.entries.at(-1)[0], "info");
 });
 
-test("missing development credentials warn and never attempt SMTP or report a successful send", async () => {
+test("multiple recipients and text-only messages are normalized", async () => {
+  let payload;
+  const service = createEmailService({
+    environment: { BREVO_API_KEY: "brevo-secret" },
+    fetchImpl: async (_url, options) => {
+      payload = JSON.parse(options.body);
+      return { ok: true, status: 201, json: async () => ({ messageId: "id" }) };
+    },
+    logger: createLogger(),
+  });
+
+  await service.sendEmail({
+    to: ["one@example.test", { email: "two@example.test", name: "Two" }],
+    subject: "Notice",
+    text: "Plain text",
+  });
+
+  assert.deepEqual(payload.to, [
+    { email: "one@example.test" },
+    { email: "two@example.test", name: "Two" },
+  ]);
+  assert.equal(payload.textContent, "Plain text");
+  assert.equal(payload.htmlContent, "<p>Plain text</p>");
+});
+
+test("missing Brevo credentials log a development notice and reject delivery", async () => {
   const logger = createLogger();
-  let createTransportCalls = 0;
+  let fetchCalls = 0;
   const service = createEmailService({
     environment: { NODE_ENV: "development" },
-    mailer: {
-      createTransport: () => {
-        createTransportCalls += 1;
-        throw new Error("must not create transport");
-      },
+    fetchImpl: async () => {
+      fetchCalls += 1;
     },
     logger,
   });
 
   await assert.rejects(
     service.sendEmail({ to: "owner@example.test", subject: "Test", text: "Hi" }),
-    /Email delivery is disabled/,
+    /BREVO_API_KEY is not configured/,
   );
+  await service.initialize();
 
-  assert.equal(createTransportCalls, 0);
-  assert.equal(logger.entries[0][0], "warn");
+  assert.equal(fetchCalls, 0);
+  assert.equal(logger.entries.filter(([level]) => level === "warn").length, 1);
   assert.match(logger.entries[0][1], /disabled in development/);
 });
 
-test("production credentials are required", async () => {
+test("Brevo API key is required outside development", async () => {
   const service = createEmailService({
     environment: { NODE_ENV: "production" },
-    mailer: { createTransport: () => assert.fail("must not create transport") },
+    fetchImpl: async () => assert.fail("must not call Brevo"),
+    logger: createLogger(),
+  });
+
+  await assert.rejects(service.initialize(), /BREVO_API_KEY is required/);
+});
+
+test("production requires an explicitly configured Brevo-verified sender", async () => {
+  const service = createEmailService({
+    environment: { NODE_ENV: "production", BREVO_API_KEY: "brevo-secret" },
+    fetchImpl: async () => assert.fail("must not call Brevo"),
     logger: createLogger(),
   });
 
   await assert.rejects(
     service.initialize(),
-    /EMAIL_USER and EMAIL_PASSWORD are required/,
+    /EMAIL_FROM must be set to a sender address verified in Brevo/,
   );
 });
 
-test("SMTP verification and send failures are logged and rejected", async () => {
+test("Brevo HTTP and network failures are reported without leaking credentials", async () => {
   const logger = createLogger();
-  const verificationFailure = createEmailService({
+  const rejectedRequest = createEmailService({
     environment: {
-      EMAIL_USER: "mailer@example.test",
-      EMAIL_PASSWORD: "secret",
+      BREVO_API_KEY: "brevo-secret",
     },
-    mailer: {
-      createTransport: () => ({
-        verify: async () => {
-          const error = new Error("secret must not be logged");
-          error.code = "EAUTH";
-          error.responseCode = 535;
-          throw error;
-        },
-      }),
-    },
+    fetchImpl: async () => ({
+      ok: false,
+      status: 401,
+      json: async () => ({ message: "sensitive server response" }),
+    }),
     logger,
   });
-  await assert.rejects(
-    verificationFailure.initialize(),
-    /Email SMTP transporter verification failed \(EAUTH, response 535\)/,
-  );
-  assert.equal(logger.entries[0][0], "error");
-  assert.match(logger.entries[0][1], /EAUTH, response 535/);
-  assert.doesNotMatch(logger.entries[0][1], /secret/);
 
-  const sendFailure = createEmailService({
-    environment: {
-      EMAIL_USER: "mailer@example.test",
-      EMAIL_PASSWORD: "secret",
-    },
-    mailer: {
-      createTransport: () => ({
-        verify: async () => {},
-        sendMail: async () => {
-          const error = new Error("secret must not be logged");
-          error.code = "EAUTH";
-          error.responseCode = 535;
-          throw error;
-        },
-      }),
-    },
-    logger,
-  });
   await assert.rejects(
-    sendFailure.sendEmail({
+    rejectedRequest.sendEmail({
       to: "owner@example.test",
       subject: "Test",
       text: "Hi",
     }),
-    /Email delivery failed \(EAUTH, response 535\)/,
+    /Brevo email API request failed \(HTTP 401\)/,
   );
-  assert.equal(logger.entries.at(-1)[0], "error");
-  assert.match(logger.entries.at(-1)[1], /EAUTH, response 535/);
+  assert.doesNotMatch(logger.entries.at(-1)[1], /sensitive|secret/);
+
+  const networkFailure = createEmailService({
+    environment: { BREVO_API_KEY: "brevo-secret" },
+    fetchImpl: async () => {
+      const error = new Error("brevo-secret must never appear in logs");
+      error.cause = { code: "ETIMEDOUT" };
+      throw error;
+    },
+    logger,
+  });
+
+  await assert.rejects(
+    networkFailure.sendEmail({
+      to: "owner@example.test",
+      subject: "Test",
+      text: "Hi",
+    }),
+    /Brevo email delivery failed \(ETIMEDOUT\)/,
+  );
+  assert.match(logger.entries.at(-1)[1], /ETIMEDOUT/);
   assert.doesNotMatch(logger.entries.at(-1)[1], /secret/);
+});
+
+test("message content and recipients are required", async () => {
+  const service = createEmailService({
+    environment: { BREVO_API_KEY: "brevo-secret" },
+    fetchImpl: async () => assert.fail("must not call Brevo"),
+    logger: createLogger(),
+  });
+
+  await assert.rejects(
+    service.sendEmail({ to: "owner@example.test", subject: "Test" }),
+    /Email subject and message content are required/,
+  );
+  await assert.rejects(
+    service.sendEmail({ to: "", subject: "Test", text: "Hi" }),
+    /valid email recipient/,
+  );
 });

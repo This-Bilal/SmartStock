@@ -10,7 +10,8 @@ const createEmailVerificationService = ({
 } = {}) => {
   const sendVerificationEmail = async (user, accountType) => {
     const verificationUrl = new URL(
-      environment.EMAIL_VERIFICATION_URL || "https://smart-stock-beta.vercel.app/verify-email",
+      environment.EMAIL_VERIFICATION_URL ||
+        "https://smart-stock-beta.vercel.app/verify-email",
     );
     const token = randomBytes(32).toString("hex");
     const tokenHash = createHash("sha256").update(token).digest("hex");

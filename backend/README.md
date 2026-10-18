@@ -212,19 +212,16 @@ npm install
 
 ### 3. Configure environment variables
 
-Create a `.env` file containing your database, JWT, Paystack, and application configuration. Copy the email settings from `.env.example` and configure SMTP delivery:
+Create a `.env` file containing your database, JWT, Paystack, and application configuration. Copy the email settings from `.env.example` and configure Brevo transactional email:
 
 | Variable | Default / purpose |
 | -------- | ----------------- |
-| `EMAIL_HOST` | SMTP server; defaults to `smtp.gmail.com` |
-| `EMAIL_PORT` | SMTP port; defaults to `587` |
-| `EMAIL_SECURE` | Set to `true` only for an implicit TLS connection; defaults to `false` |
-| `EMAIL_USER` | SMTP username |
-| `EMAIL_PASSWORD` | SMTP password |
-| `EMAIL_FROM` | Sender address; defaults to `EMAIL_USER`, then `noreply@smartstock.com` |
+| `BREVO_API_KEY` | Brevo API key used with its transactional email REST API |
+| `EMAIL_FROM` | Sender address verified in Brevo; required in production |
+| `EMAIL_FROM_NAME` | Display name for the sender; defaults to `SmartStock` |
 | `EMAIL_VERIFICATION_URL` | Frontend verification page; defaults to the deployed SmartStock verification page. Set this to `http://localhost:5173/verify-email` for local testing or to your own deployed frontend URL. |
 
-For Gmail, use an app password rather than your Google account password. Email delivery is disabled with a development-mode notice when SMTP credentials are not configured in development. Configure both `EMAIL_USER` and `EMAIL_PASSWORD` to enable delivery. Owner registration and employee creation send a verification link that expires after 24 hours; unverified accounts cannot log in. Opening a valid verification link verifies the address and signs the account in. Users can request a replacement link from the login page. Never commit real credentials.
+In Brevo, create an API key and verify the sender address or domain before using it. Set `BREVO_API_KEY` and the verified `EMAIL_FROM` address in the backend environment (including Render for deployment); never commit the key. Email delivery is disabled with a development-mode notice when the API key is absent in development. Owner registration and employee creation send a verification link that expires after 24 hours; unverified accounts cannot log in. Opening a valid verification link verifies the address and signs the account in. Users can request a replacement link from the login page. Never commit real credentials.
 
 When deploying a custom frontend, set `EMAIL_VERIFICATION_URL` to its public URL ending in `/verify-email`.
 
