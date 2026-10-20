@@ -9,7 +9,6 @@ import { useTitle } from "../hooks/useTitile";
 import { IoMdEyeOff, IoMdEye } from "react-icons/io";
 import { toast } from "sonner";
 
-
 const Login = () => {
   useTitle("Login to SmartStock");
 
@@ -53,10 +52,10 @@ const Login = () => {
           navigate("/cashierhomepage");
         }
       }
-      toast.success("Logged in successfully")
+
+      toast.success("Logged in successfully");
     } catch (error) {
       toast.error(error.message || "Login failed");
-
     } finally {
       setLoading(false);
     }
@@ -64,6 +63,7 @@ const Login = () => {
 
   const handleResendVerification = async () => {
     setResendingVerification(true);
+
     try {
       const response = await resendEmailVerification(loginType, email);
       toast.success(response.message);
@@ -75,7 +75,7 @@ const Login = () => {
   };
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-red-50 px-3 py-8 sm:px-4 sm:py-10">
+    <div className="flex min-h-dvh w-full items-center justify-center bg-red-50 px-3 py-8 sm:px-4 sm:py-10">
       <div className="w-full max-w-md rounded-xl bg-white p-5 shadow-lg sm:p-6">
         {/* HEADER */}
         <h1 className="text-center text-xl font-semibold sm:text-2xl">
@@ -174,7 +174,9 @@ const Login = () => {
           disabled={resendingVerification || !email.trim()}
           className="mt-3 w-full text-xs text-red-600 hover:underline disabled:cursor-not-allowed disabled:opacity-50 sm:text-sm"
         >
-          {resendingVerification ? "Requesting email..." : "Resend verification email"}
+          {resendingVerification
+            ? "Requesting email..."
+            : "Resend verification email"}
         </button>
 
         {/* REGISTER */}
