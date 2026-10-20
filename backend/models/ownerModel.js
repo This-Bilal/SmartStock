@@ -36,6 +36,16 @@ const ownerSchema = new mongoose.Schema (
             select: false
         },
 
+        passwordResetToken: {
+            type: String,
+            select: false
+        },
+
+        passwordResetExpiresAt: {
+            type: Date,
+            select: false
+        },
+
         businessName: {
             type: String,
             required: true,
@@ -61,5 +71,7 @@ const ownerSchema = new mongoose.Schema (
     },
     {timestamps: true}
 )
+
+ownerSchema.index({ passwordResetToken: 1 }, { sparse: true });
 
 module.exports = mongoose.model("Owner", ownerSchema)

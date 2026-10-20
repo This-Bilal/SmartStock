@@ -219,11 +219,14 @@ Create a `.env` file containing your database, JWT, Paystack, and application co
 | `BREVO_API_KEY` | Brevo API key used with its transactional email REST API |
 | `EMAIL_FROM` | Sender address verified in Brevo; required in production |
 | `EMAIL_FROM_NAME` | Display name for the sender; defaults to `SmartStock` |
+| `FRONTEND_URL` | Public frontend base URL used to create password-reset links; set to `http://localhost:5173` locally and your Vercel frontend URL in Render |
 | `EMAIL_VERIFICATION_URL` | Frontend verification page; defaults to the deployed SmartStock verification page. Set this to `http://localhost:5173/verify-email` for local testing or to your own deployed frontend URL. |
 
 In Brevo, create an API key and verify the sender address or domain before using it. Set `BREVO_API_KEY` and the verified `EMAIL_FROM` address in the backend environment (including Render for deployment); never commit the key. Email delivery is disabled with a development-mode notice when the API key is absent in development. Owner registration and employee creation send a verification link that expires after 24 hours; unverified accounts cannot log in. Opening a valid verification link verifies the address and signs the account in. Users can request a replacement link from the login page. Never commit real credentials.
 
 When deploying a custom frontend, set `EMAIL_VERIFICATION_URL` to its public URL ending in `/verify-email`.
+
+Password reset requests use `POST /api/loginStatus/forgot-password` with an email and `accountType` (`owner` or `employee`); password resets use `POST /api/loginStatus/reset-password` with the emailed token and a new password. Reset tokens are stored as SHA-256 hashes and expire after 20 minutes. Configure `FRONTEND_URL` in the backend environment (including Render) so reset links open the correct Vercel frontend. Passwords must be 8–72 characters and fit bcrypt's 72-byte input limit. Password changes do not revoke JWT cookies already issued to signed-in users.
 
 ### 4. Start the backend
 

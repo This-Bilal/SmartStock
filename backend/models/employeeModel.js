@@ -40,6 +40,16 @@ const employeeSchema = new mongoose.Schema(
       select: false,
     },
 
+    passwordResetToken: {
+      type: String,
+      select: false,
+    },
+
+    passwordResetExpiresAt: {
+      type: Date,
+      select: false,
+    },
+
     password: {
       type: String,
       required: true,
@@ -70,5 +80,6 @@ const employeeSchema = new mongoose.Schema(
 );
 
 employeeSchema.index({ owner: 1, email: 1 }, { unique: true });
+employeeSchema.index({ passwordResetToken: 1 }, { sparse: true });
 
 module.exports = mongoose.model("Employee", employeeSchema);

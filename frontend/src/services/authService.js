@@ -1,4 +1,9 @@
-import { apiRequest, AUTH_ENDPOINT, EMPLOYEE_ENDPOINTS, OWNER_ENDPOINTS } from "../config/api";
+import {
+  apiRequest,
+  AUTH_ENDPOINT,
+  EMPLOYEE_ENDPOINTS,
+  OWNER_ENDPOINTS,
+} from "../config/api";
 
 // Store user to the localstorage
 const storeUser = (user) => {
@@ -163,6 +168,23 @@ export const resendEmailVerification = async (accountType, email) => {
   });
 };
 
+export const requestPasswordReset = async (email, accountType) => {
+  return apiRequest(AUTH_ENDPOINT.FORGOT_PASSWORD, {
+    method: "POST",
+    body: {
+      email: normaliseEmail(email),
+      accountType,
+    },
+  });
+};
+
+export const resetPassword = async (token, password) => {
+  return apiRequest(AUTH_ENDPOINT.RESET_PASSWORD, {
+    method: "POST",
+    body: { token, password },
+  });
+};
+
 /**
  * Logout Owner
  */
@@ -224,6 +246,8 @@ const authService = {
   loginEmployee,
   verifyEmail,
   resendEmailVerification,
+  requestPasswordReset,
+  resetPassword,
   logoutEmployee,
   checkLoginStatus
 };

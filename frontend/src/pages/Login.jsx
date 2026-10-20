@@ -127,6 +127,14 @@ const Login = () => {
                 {showPassword ? <IoMdEyeOff /> : <IoMdEye />}
               </button>
             </div>
+            <div className="mt-2 text-right">
+              <Link
+                to="/forgot-password"
+                className="text-xs text-red-600 hover:underline sm:text-sm"
+              >
+                Forgot Password?
+              </Link>
+            </div>
           </div>
 
           {/* ACCOUNT TYPE */}

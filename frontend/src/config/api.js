@@ -20,6 +20,8 @@ const api = (path) => {
 // Auth endpoint
 export const AUTH_ENDPOINT = {
   LOGIN_STATUS: api("loginStatus/status"),
+  FORGOT_PASSWORD: api("loginStatus/forgot-password"),
+  RESET_PASSWORD: api("loginStatus/reset-password"),
 };
 
 // Cart endpoints
