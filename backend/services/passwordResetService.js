@@ -21,7 +21,16 @@ const createPasswordResetService = ({
     const user = await Model.findOne({ email });
 
     if (!user) {
-      return false;
+      const OtherModel =
+        accountType === "owner" ? EmployeeModel : OwnerModel;
+      const otherAccount = await OtherModel.findOne({ email });
+
+      return otherAccount
+        ? {
+            status: "wrong_account_type",
+            actualAccountType: accountType === "owner" ? "employee" : "owner",
+          }
+        : false;
     }
 
     const token = randomBytes(32).toString("hex");

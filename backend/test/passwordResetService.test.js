@@ -137,6 +137,25 @@ test("requests use the selected account collection and replace previous tokens",
   assert.equal(OwnerModel.user, null);
 });
 
+test("reports when an email belongs to the other account type", async () => {
+  const messages = [];
+  const service = createPasswordResetService({
+    OwnerModel: createModel(null),
+    EmployeeModel: createModel(createUser()),
+    send: async (message) => messages.push(message),
+    environment: { FRONTEND_URL: "https://app.example.test" },
+  });
+
+  assert.deepEqual(
+    await service.requestPasswordReset("user@example.test", "owner"),
+    {
+      status: "wrong_account_type",
+      actualAccountType: "employee",
+    },
+  );
+  assert.equal(messages.length, 0);
+});
+
 test("reset hashes the new password and consumes the token once", async () => {
   const user = createUser();
   user.password = await bcrypt.hash("old-password-123", 10);

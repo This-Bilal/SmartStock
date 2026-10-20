@@ -30,10 +30,19 @@ const requestPasswordReset = asyncHandler(async (req, res) => {
   }
 
   try {
-    await passwordResetService.requestPasswordReset(
+    const result = await passwordResetService.requestPasswordReset(
       normalizedEmail,
       accountType,
     );
+
+    if (result?.status === "wrong_account_type") {
+      const accountLabel =
+        result.actualAccountType === "owner" ? "Owner" : "Employee";
+      return res.status(400).json({
+        message: `This email belongs to an ${accountLabel} account. Select ${accountLabel} and try again.`,
+      });
+    }
+
     return res.status(200).json({ message: PASSWORD_RESET_MESSAGE });
   } catch (error) {
     console.error(
