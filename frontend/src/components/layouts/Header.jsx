@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import {
   checkLoginStatus,
@@ -13,10 +13,20 @@ const Header = () => {
   const [loggedIn, setLoggedIn] = useState(false);
   const [user, setUser] = useState(null);
 
-  const isAuthPage = ["/login", "/register"].includes(location.pathname);
+  const isAuthPage = [
+    "/login",
+    "/register",
+    "/verify-email",
+    "/forgot-password",
+    "/reset-password",
+  ].includes(location.pathname);
 
   // Check login status
   useEffect(() => {
+    if (isAuthPage) {
+      return undefined;
+    }
+
     const verifyLogin = async () => {
       try {
         const status = await checkLoginStatus();
@@ -28,14 +38,15 @@ const Header = () => {
         } else {
           setUser(null);
         }
-      } catch (error) {
+      } catch {
         setLoggedIn(false);
         setUser(null);
       }
     };
 
     verifyLogin();
-  }, [location.pathname]);
+    return undefined;
+  }, [isAuthPage, location.pathname]);
 
   // Logout
   const handleLogout = async () => {

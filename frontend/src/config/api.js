@@ -130,19 +130,25 @@ export const API_CONFIG = {
 
 export const apiClient = axios.create(API_CONFIG);
 
+const PUBLIC_AUTH_PATHS = new Set([
+  "/",
+  "/login",
+  "/register",
+  "/verify-email",
+  "/forgot-password",
+  "/reset-password",
+]);
+
 apiClient.interceptors.response.use(
   (response) => response,
 
   (error) => {
-    if (error.response?.status === 401) {
-      if (
-        window.location.pathname !== "/" &&
-        window.location.pathname !== "/login" &&
-        window.location.pathname !== "/register"
-      ) {
-        localStorage.removeItem("user");
-        window.location.href = "/login";
-      }
+    if (
+      error.response?.status === 401 &&
+      !PUBLIC_AUTH_PATHS.has(window.location.pathname)
+    ) {
+      localStorage.removeItem("user");
+      window.location.href = "/login";
     }
 
     return Promise.reject(error);
