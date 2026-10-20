@@ -99,7 +99,7 @@ const LandingPage = () => {
                 </span>
 
                 <h2 className="text-white text-2xl sm:text-3xl lg:text-4xl font-semibold mt-2">
-                  Smart inventory and
+                  Smart inventory and {" "}
                   <br className="hidden sm:block" />
                   better business
                 </h2>
