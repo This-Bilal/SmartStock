@@ -1,211 +1,172 @@
-import React from "react";
+import {
+  FiArrowRight,
+  FiBarChart2,
+  FiBox,
+  FiCheck,
+  FiTrendingUp,
+  FiUsers,
+} from "react-icons/fi";
 import { Link } from "react-router-dom";
 import { useTitle } from "../../hooks/useTitile";
+
+const features = [
+  {
+    icon: FiBox,
+    title: "Inventory you can trust",
+    description:
+      "Keep products, stock levels, and adjustments organized in one place.",
+  },
+  {
+    icon: FiTrendingUp,
+    title: "Sales with more clarity",
+    description:
+      "Stay on top of sales activity and understand how your business is doing.",
+  },
+  {
+    icon: FiUsers,
+    title: "A team that stays in sync",
+    description:
+      "Give your team the tools they need with roles built around their work.",
+  },
+  {
+    icon: FiBarChart2,
+    title: "Insights for better decisions",
+    description: "Turn everyday business activity into reports you can act on.",
+  },
+];
 
 const LandingPage = () => {
   useTitle("SmartStock: Inventory made easy");
 
   return (
-    <main className="w-full bg-red-50">
-      {/* ================================================= */}
-      {/*                    HERO SECTION                   */}
-      {/* ================================================= */}
-
-      <section className="w-full">
-        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-12 sm:py-16 lg:py-20 text-center">
-          {/* Main Heading */}
-          <div className="text-3xl sm:text-4xl lg:text-5xl font-semibold text-black mb-5">
-            Manage Your Stock
-          </div>
-
-          <div className="text-3xl sm:text-4xl lg:text-5xl mb-5 font-semibold text-red-700">
-            Grow Your Business
-          </div>
-
-          {/* Description */}
-          <div className="text-base sm:text-lg lg:text-xl leading-relaxed max-w-3xl mx-auto">
-            Inventory, sales, and employees management made simple in a single
-            platform.
-          </div>
-
-          <div className="text-sm sm:text-base lg:text-lg leading-relaxed max-w-3xl mx-auto">
-            Take control of your stock with our powerful, intuitive platform.
-            Track inventory and optimize your operations with real-time
-            insights.
-          </div>
-
-          {/* Hero Buttons */}
-          <div className="flex flex-col sm:flex-row gap-3 sm:gap-5 justify-center items-center text-sm my-7">
-            <Link
-              to="/register"
-              className="rounded-lg bg-red-500 px-2.5 py-1.5 text-xs text-white transition-all duration-300 hover:bg-red-600 sm:px-3 sm:py-2 sm:text-sm md:px-4"
-            >
-              Get started
-            </Link>
-
-            <Link
-              to="/login"
-              className="rounded-lg border border-red-200 px-2.5 py-1.5 text-xs transition-all duration-300 hover:bg-red-200 sm:px-3 sm:py-2 sm:text-sm md:px-4"
-            >
-              Sign in
-            </Link>
-          </div>
-
-          {/* ================= WHY SMARTSTOCK ================= */}
-
-          <div className="mt-12 sm:mt-16 text-red-700 text-xl sm:text-2xl font-semibold">
-            Why SmartStock?
-            <div
-              id="how"
-              className="mt-5 grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-5 max-w-4xl mx-auto rounded-lg shadow-md p-4 sm:p-6"
-            >
-              {/* Inventory */}
-              <div className="rounded-lg bg-white text-gray-600 p-5 min-h-24 flex flex-col justify-center shadow-md">
-                <div className="text-sm sm:text-base">📦 Inventory</div>
-                <div className="text-xs sm:text-sm mt-1">Manage stock</div>
-              </div>
-
-              {/* Sales */}
-              <div className="rounded-lg bg-white text-gray-600 p-5 min-h-24 flex flex-col justify-center shadow-md">
-                <div className="text-sm sm:text-base">💰 Sales</div>
-                <div className="text-xs sm:text-sm mt-1">Track sales</div>
-              </div>
-
-              {/* Employees */}
-              <div className="rounded-lg bg-white text-gray-600 p-5 min-h-24 flex flex-col justify-center shadow-md">
-                <div className="text-sm sm:text-base">👥 Employees</div>
-                <div className="text-xs sm:text-sm mt-1">Manage employees</div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* ================================================= */}
-      {/*              CTA / FEATURE SECTION                */}
-      {/* ================================================= */}
-
-      <section className="relative">
-        {/* ================= RED CTA ================= */}
-
-        <div className="bg-red-500">
-          <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-12 sm:py-16 lg:py-20 pb-48 sm:pb-56 lg:pb-64">
-            <div className="flex flex-col lg:flex-row items-center justify-between gap-6 sm:gap-8">
-              {/* CTA TEXT */}
-
-              <div className="text-center lg:text-left">
-                <span className="font-semibold text-white text-sm sm:text-base">
-                  A STEP AWAY
-                </span>
-
-                <h2 className="text-white text-2xl sm:text-3xl lg:text-4xl font-semibold mt-2">
-                  Smart inventory and {" "}
-                  <br className="hidden sm:block" />
-                  better business
-                </h2>
-              </div>
-
-              {/* CTA BUTTON */}
-
+    <main className="overflow-hidden bg-white text-gray-900">
+      <section className="relative bg-red-50">
+        <div className="relative mx-auto grid max-w-7xl items-center gap-12 px-5 py-16 sm:px-8 sm:py-20 lg:grid-cols-2 lg:gap-16 lg:px-10 lg:py-24">
+          <div className="text-center lg:text-left">
+            <span className="inline-flex items-center gap-2 rounded-full border border-red-100 bg-white/80 px-3.5 py-1.5 text-xs font-semibold tracking-wide text-red-700 shadow-sm sm:text-sm">
+              <span className="h-2 w-2 rounded-full bg-red-500" />
+              INVENTORY, WITHOUT THE GUESSWORK
+            </span>
+            <h1 className="mt-6 text-4xl font-bold leading-tight tracking-tight text-gray-950 sm:text-5xl lg:text-6xl">
+              Run your stock.
+              <span className="block text-red-600">Grow with confidence.</span>
+            </h1>
+            <p className="mx-auto mt-6 max-w-xl text-base leading-7 text-gray-600 sm:text-lg sm:leading-8 lg:mx-0">
+              Bring inventory, sales, and your team together in one simple
+              workspace—so you can spend less time keeping track and more time
+              moving your business forward.
+            </p>
+            <div className="mt-8 flex flex-col items-stretch justify-center gap-3 sm:flex-row sm:items-center lg:justify-start">
               <Link
                 to="/register"
-                className="rounded-lg bg-gray-900 px-2.5 py-1.5 text-xs text-white transition-all duration-300 hover:bg-gray-800 sm:px-3 sm:py-2 sm:text-sm md:px-4"
+                className="inline-flex min-h-12 items-center justify-center gap-2 rounded-lg bg-red-600 px-6 py-3 text-sm font-semibold text-white shadow-lg shadow-red-600/20 transition hover:bg-red-700 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-red-700"
               >
-                Sign up for free
+                Get started for free
+                <FiArrowRight aria-hidden="true" />
+              </Link>
+              <Link
+                to="/login"
+                className="inline-flex min-h-12 items-center justify-center rounded-lg border border-gray-200 bg-white px-6 py-3 text-sm font-semibold text-gray-700 transition hover:border-gray-300 hover:bg-gray-50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-red-700"
+              >
+                Sign in
               </Link>
             </div>
-          </div>
-        </div>
-
-        {/* ================= FEATURE CARD ================= */}
-
-        <div className="absolute left-1/2 -translate-x-1/2 bottom-0 translate-y-[45%] sm:translate-y-[50%] md:translate-y-[75%] lg:translate-y-[65%] w-[calc(100%-1rem)] sm:w-[calc(100%-2rem)] md:w-[calc(100%-3rem)] lg:w-[calc(100%-3rem)] max-w-250 flex flex-row rounded-lg sm:rounded-xl overflow-hidden shadow-xl z-10">
-          {/* IMAGE */}
-
-          <div className="w-[40%] flex items-center justify-center overflow-hidden">
-            <img
-              src="/download.jpg"
-              alt="SmartStock dashboard"
-              className="w-full h-full object-contain block"
-            />
+            <div className="mt-6 flex flex-wrap items-center justify-center gap-x-5 gap-y-2 text-sm text-gray-600 lg:justify-start">
+              {["Inventory", "Sales", "Team"].map((item) => (
+                <span key={item} className="inline-flex items-center gap-2">
+                  <FiCheck
+                    aria-hidden="true"
+                    className="text-red-600"
+                    size={16}
+                  />
+                  {item} in one place
+                </span>
+              ))}
+            </div>
           </div>
 
-          {/* FEATURES */}
-
-          <div className="flex min-h-45 w-[60%] flex-col items-center justify-center bg-red-50 px-3 py-4 sm:min-h-52.5 sm:px-4 sm:py-5 md:min-h-62.5 md:px-6 md:py-7 lg:min-h-105 lg:p-10">
-            <div className="flex flex-col gap-2 sm:gap-2.5 md:gap-3.5 lg:gap-5">
-              <div className="flex items-center gap-1.5 font-semibold text-[9px] text-gray-700 sm:gap-2 sm:text-[10px] md:text-xs lg:text-lg">
-                <span>✅</span>
-                <span>Accurate stock tracking</span>
+          <div className="relative mx-auto w-full max-w-xl">
+            <div className="relative overflow-hidden rounded-2xl border border-white/70 bg-white p-2 shadow-2xl shadow-gray-900/10 sm:p-3">
+              <img
+                src="/download.jpg"
+                alt="Business owner reviewing business growth"
+                className="aspect-4/3 w-full rounded-xl object-cover object-center"
+              />
+              <div className="absolute bottom-6 left-6 right-6 rounded-xl border border-white/70 bg-white/95 p-4 shadow-lg backdrop-blur sm:bottom-8 sm:left-8 sm:right-8 sm:p-5">
+                <p className="text-sm font-semibold text-gray-900">
+                  Your business, in better focus
+                </p>
+                <p className="mt-1 text-sm leading-6 text-gray-600">
+                  Keep the details organized and make your next move with
+                  confidence.
+                </p>
               </div>
-
-              <div className="flex items-center gap-1.5 font-semibold text-[9px] text-gray-700 sm:gap-2 sm:text-[10px] md:text-xs lg:text-lg">
-                <span>✅</span>
-                <span>Sales accountability</span>
-              </div>
-
-              <div className="flex items-center gap-1.5 font-semibold text-[9px] text-gray-700 sm:gap-2 sm:text-[10px] md:text-xs lg:text-lg">
-                <span>✅</span>
-                <span>Accurate sales tracking</span>
-              </div>
-
-              <div className="flex items-center gap-1.5 font-semibold text-[9px] text-gray-700 sm:gap-2 sm:text-[10px] md:text-xs lg:text-lg">
-                <span>✅</span>
-                <span>Adjust inventory</span>
-              </div>
-
-              <div className="flex items-center gap-1.5 font-semibold text-[9px] text-gray-700 sm:gap-2 sm:text-[10px] md:text-xs lg:text-lg">
-                <span>✅</span>
-                <span>Get reports</span>
-              </div>
-
-              <p className="mt-1 text-center text-[9px] font-medium italic text-gray-500 sm:text-[10px] md:text-xs lg:mt-2 lg:text-base">
-                And many more...
-              </p>
             </div>
           </div>
         </div>
       </section>
 
-      {/* SPACE AFTER FEATURE SECTION */}
-
-      <div className="h-30 sm:h-60 md:h-100 lg:h-87.5 bg-red-50" />
-
-      {/* ================================================= */}
-      {/*                  FINAL CTA SECTION                 */}
-      {/* ================================================= */}
-
-      <section className="w-full bg-red-50">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-16 sm:py-30 lg:py-35 text-center">
-          {/* Small Heading */}
-
-          <div className="font-semibold text-red-700 text-base sm:text-lg mb-4 sm:mt-0 md:mt-0">
-            Try SmartStock today
-          </div>
-
-          {/* Main Heading */}
-
-          <h2 className="text-xl sm:text-2xl lg:text-3xl font-semibold text-gray-900">
-            Ready to take control of your inventory?
-          </h2>
-
-          {/* Description */}
-
-          <p className="mt-3 text-sm sm:text-base text-gray-600 max-w-2xl mx-auto">
-            Start managing your inventory, sales, and business operations
-            smarter with SmartStock.
+      <section
+        id="how"
+        aria-labelledby="features-heading"
+        className="mx-auto max-w-7xl px-5 py-16 sm:px-8 sm:py-20 lg:px-10 lg:py-24"
+      >
+        <div className="mx-auto max-w-2xl text-center">
+          <p className="text-sm font-semibold uppercase tracking-wider text-red-600">
+            Everything working together
           </p>
+          <h2
+            id="features-heading"
+            className="mt-3 text-3xl font-bold tracking-tight text-gray-950 sm:text-4xl"
+          >
+            A simpler way to run your business
+          </h2>
+          <p className="mt-4 text-base leading-7 text-gray-600">
+            Get the essentials in one place, with less busywork between them.
+          </p>
+        </div>
 
-          {/* Button */}
-
-          <div className="flex justify-center mt-8">
-            <Link
-              to="/register"
-              className="rounded-lg bg-red-500 px-2.5 py-1.5 text-xs text-white transition-all duration-300 hover:bg-red-600 sm:px-3 sm:py-2 sm:text-sm md:px-4"
+        <div className="mt-10 grid gap-4 sm:grid-cols-2 lg:mt-14 lg:grid-cols-4">
+          {features.map(({ icon: Icon, title, description }) => (
+            <article
+              key={title}
+              className="rounded-xl border border-gray-200 bg-white p-6 transition hover:-translate-y-1 hover:border-red-200 hover:shadow-lg hover:shadow-gray-900/5"
             >
-              Get started
-            </Link>
+              <span className="inline-flex h-11 w-11 items-center justify-center rounded-lg bg-red-50 text-red-600">
+                <Icon aria-hidden="true" size={21} />
+              </span>
+              <h3 className="mt-5 text-base font-semibold text-gray-900">
+                {title}
+              </h3>
+              <p className="mt-2 text-sm leading-6 text-gray-600">
+                {description}
+              </p>
+            </article>
+          ))}
+        </div>
+      </section>
+
+      <section className="px-5 pb-16 sm:px-8 sm:pb-20 lg:px-10 lg:pb-24">
+        <div className="mx-auto flex max-w-7xl flex-col items-center justify-between gap-7 rounded-2xl bg-gray-950 px-6 py-10 text-center sm:px-10 sm:py-12 lg:flex-row lg:px-14 lg:text-left">
+          <div>
+            <p className="text-sm font-semibold uppercase tracking-wider text-red-300">
+              Start with a clearer picture
+            </p>
+            <h2 className="mt-2 text-2xl font-bold tracking-tight text-white sm:text-3xl">
+              Ready to make stock management simpler?
+            </h2>
+            <p className="mt-3 max-w-2xl text-sm leading-6 text-gray-300 sm:text-base">
+              Set up your SmartStock account and bring your day-to-day
+              operations together.
+            </p>
           </div>
+          <Link
+            to="/register"
+            className="inline-flex min-h-12 shrink-0 items-center justify-center gap-2 rounded-lg bg-red-600 px-6 py-3 text-sm font-semibold text-white transition hover:bg-red-500 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
+          >
+            Create your account
+            <FiArrowRight aria-hidden="true" />
+          </Link>
         </div>
       </section>
     </main>
