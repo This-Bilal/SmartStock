@@ -54,7 +54,7 @@ const createUser = (overrides = {}) => ({
 const readToken = (message) =>
   new URL(message.text.match(/https:\/\/\S+/)[0]).searchParams.get("token");
 
-test("requests store only a hashed 20-minute token and email a safe reset link", async () => {
+test("requests store only a hashed 10-minute token and email a safe reset link", async () => {
   const user = createUser();
   const OwnerModel = createModel(user);
   const messages = [];
@@ -82,7 +82,8 @@ test("requests store only a hashed 20-minute token and email a safe reset link",
   );
   assert.equal(messages[0].subject, "Reset Your SmartStock Password");
   assert.match(messages[0].html, /&lt;script&gt;/);
-  assert.match(messages[0].text, /expires in 20 minutes/);
+  assert.match(messages[0].text, /expires in 10 minutes/);
+  assert.match(messages[0].html, /expires in 10 minutes/);
   assert.match(messages[0].text, /ignore this email/);
   assert.equal(
     new URL(messages[0].text.match(/https:\/\/\S+/)[0]).pathname,

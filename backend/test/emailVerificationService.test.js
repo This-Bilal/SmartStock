@@ -35,11 +35,13 @@ test("verification email stores only a hashed expiring token and includes a safe
   assert.equal(user.emailVerificationToken, user.emailVerificationToken.toLowerCase());
   assert.equal(
     user.emailVerificationExpiresAt.getTime(),
-    now.getTime() + 24 * 60 * 60 * 1000,
+    now.getTime() + 10 * 60 * 1000,
   );
   assert.equal(user.saveCalls, 1);
   assert.equal(messages.length, 1);
   assert.equal(messages[0].to, user.email);
+  assert.match(messages[0].text, /expires in 10 minutes/);
+  assert.match(messages[0].html, /expires in 10 minutes/);
   assert.match(messages[0].html, /&lt;script&gt;/);
 
   const url = new URL(messages[0].text.match(/https:\/\/\S+/)[0]);

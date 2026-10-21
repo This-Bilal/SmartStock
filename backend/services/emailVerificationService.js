@@ -1,7 +1,7 @@
 const { createHash, randomBytes } = require("node:crypto");
 const { sendEmail } = require("./emailService");
 
-const TOKEN_EXPIRY_MS = 24 * 60 * 60 * 1000;
+const TOKEN_EXPIRY_MS = 10 * 60 * 1000;
 
 const createEmailVerificationService = ({
   send = sendEmail,
@@ -28,8 +28,8 @@ const createEmailVerificationService = ({
     await send({
       to: user.email,
       subject: "Verify your SmartStock email",
-      text: `Hello ${user.name},\n\nVerify your email address by opening this link:\n${verificationUrl}\n\nThis link expires in 24 hours. If you did not request this, you can ignore this email.`,
-      html: `<p>Hello ${escapeHtml(user.name)},</p><p>Verify your email address by clicking the link below. It expires in 24 hours.</p><p><a href="${escapeHtml(verificationUrl.toString())}">Verify email address</a></p><p>If you did not request this, you can ignore this email.</p>`,
+      text: `Hello ${user.name},\n\nVerify your email address by opening this link:\n${verificationUrl}\n\nThis link expires in 10 minutes. If you did not request this, you can ignore this email.`,
+      html: `<p>Hello ${escapeHtml(user.name)},</p><p>Verify your email address by clicking the link below. It expires in 10 minutes.</p><p><a href="${escapeHtml(verificationUrl.toString())}">Verify email address</a></p><p>If you did not request this, you can ignore this email.</p>`,
     });
   };
 
