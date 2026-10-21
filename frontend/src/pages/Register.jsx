@@ -6,7 +6,7 @@ import { IoMdEyeOff, IoMdEye } from "react-icons/io";
 import { toast } from "sonner";
 
 const Register = () => {
-  useTitle("Rigister for SmartStock");
+  useTitle("Register for SmartStock");
   const navigate = useNavigate();
 
   const [showPassword, setShowPassword] = useState(false);
