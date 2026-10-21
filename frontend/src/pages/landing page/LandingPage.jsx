@@ -53,7 +53,7 @@ const LandingPage = () => {
             </h1>
             <p className="mx-auto mt-6 max-w-xl text-base leading-7 text-gray-600 sm:text-lg sm:leading-8 lg:mx-0">
               Bring inventory, sales, and your team together in one simple
-              workspace—so you can spend less time keeping track and more time
+              workspace so you can spend less time keeping track and more time
               moving your business forward.
             </p>
             <div className="mt-8 flex flex-col items-stretch justify-center gap-3 sm:flex-row sm:items-center lg:justify-start">
