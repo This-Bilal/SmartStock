@@ -20,6 +20,7 @@ const OwnerHomePage = () => {
   const [owner, setOwner] = useState(null);
   const [products, setProducts] = useState([]);
   const [sales, setSales] = useState([]);
+  const [totalSales, setTotalSales] = useState([])
   const [report, setReport] = useState(null);
   const [employees, setEmployees] = useState([]);
   const [lowStock, setLowstock] = useState([]);
@@ -78,6 +79,7 @@ const OwnerHomePage = () => {
 
         setReport(data);
         setSales(data?.sales || []);
+        setTotalSales(data?.totalSales)
       } catch (error) {
         console.error("Failed to fetch today's sales:", error);
       } finally {
@@ -158,6 +160,7 @@ const OwnerHomePage = () => {
           owner={owner}
           products={products}
           sales={sales}
+          totalSales={totalSales}
           report={report}
           activeEmployees={activeEmployees}
           loadingOwner={loadingOwner}

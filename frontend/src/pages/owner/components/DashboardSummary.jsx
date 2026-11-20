@@ -5,6 +5,7 @@ const DashboardSummary = ({
   owner,
   products,
   sales,
+  totalSales,
   report,
   activeEmployees,
 }) => {
@@ -67,7 +68,7 @@ const DashboardSummary = ({
               </p>
 
               <p className="mt-1.5 text-xl font-bold text-gray-800 sm:mt-2 sm:text-2xl">
-                {sales?.totalSales || 0}
+                {totalSales || 0}
               </p>
 
               <p className="mt-1 text-[10px] text-gray-400 sm:text-xs">
